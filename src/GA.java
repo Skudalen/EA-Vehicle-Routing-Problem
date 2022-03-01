@@ -39,10 +39,10 @@ public class GA {
         x, fitness, weights = self.fitness(pop, self.params)   # returns x-values list, fitness list, weights list
         return x, fitness, weights
     */
-    public static List<Object> evaluate_pop(int[][] pop) {
+    public static List<Double[]> evaluate_pop(int[][] pop) {
         
-    int[][] a = new int[0][0];
-        return Arrays.asList(a);
+    Double[] a = new Double[pop.length];
+        return Arrays.asList(a, a);
     }
 
     /*
@@ -52,7 +52,7 @@ public class GA {
     */
     public static Boolean do_terminate(Double[] pop_eval, int gen_count) {
         
-        return true;
+        return gen_count > 5;
     }
 
 
@@ -96,7 +96,7 @@ public class GA {
     public static int[][] crossover(int[][] offsprings) {
         
     int[][] a = new int[0][0];
-        return a;
+        return offsprings;
     }
 
     /*
@@ -117,7 +117,7 @@ public class GA {
     public static int[][] mutate(int[][] offsprings) {
         
     int[][] a = new int[0][0];
-        return a;
+        return offsprings;
     }
 
     /*
@@ -129,7 +129,7 @@ public class GA {
     public static int[][] make_offsprings(int[][] parents) {
         
     int[][] a = new int[0][0];
-        return a;
+        return parents;
     }
     
     /*
@@ -189,19 +189,19 @@ public class GA {
 
     print('Algorithm succsessfully executed')
     */
-    public static void main(String[] args) {
+    public static Map<Integer, List<Object>> main(String[] args) {
 
         int[][] pop = init_pop();
         int gen_count = 0;
-        List<Object> pop_eval = evaluate_pop(pop); //pop_weights, pop_fitness
-        //entropy = get_pop_entropy(pop);
+        List<Double[]> pop_eval = evaluate_pop(pop); //pop_weights, pop_fitness
         Map<Integer, List<Object>> eval_log = new HashMap<Integer, List<Object>>(); 
         eval_log.put(gen_count, Arrays.asList(pop, pop_eval.get(0), pop_eval.get(1)));
-        // Evolution:
+
+        // EVOLUTION:
         while (! do_terminate((Double[]) pop_eval.get(1), gen_count) ) {
             int[][] parents = select_parents(pop);
             int[][] offsprings = make_offsprings(parents);
-            List<Object> off_eval = evaluate_pop(offsprings);   //off_weights, off_fitness
+            List<Double[]> off_eval = evaluate_pop(offsprings);   //off_weights, off_fitness
             pop = select_survivors(parents, offsprings, (Double[]) pop_eval.get(1), (Double[]) off_eval.get(1));
             gen_count += 1;
             // Store data, gen > 0
@@ -210,6 +210,7 @@ public class GA {
         }
             
         System.out.println("Algorithm succsessfully executed");
+        return eval_log;
 
 
         
