@@ -1,5 +1,7 @@
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +28,9 @@ public class GA {
         pop = list(map(lambda x: np.binary_repr(x, self.indiv_len), rand_ints))
         return pop
     */
-    public static int[][] init_pop(int[][] pop) {
+    public static int[][] init_pop() {
         
-        int[][] a = new int[0][0];
+        int[][] a = new int[200][200];
         return a;
     }
 
@@ -48,7 +50,7 @@ public class GA {
         term = True if gen_count >= self.max_gen else False
         return term
     */
-    public static Boolean do_terminate(int[][] pop_eval, int gen_count) {
+    public static Boolean do_terminate(Double[] pop_eval, int gen_count) {
         
         return true;
     }
@@ -139,8 +141,8 @@ public class GA {
     */
     public static int[][] select_survivors(int[][] parents, 
                                     int[][] offsprings, 
-                                    int[] pop_weights, 
-                                    int[][]off_weights) {
+                                    Double[] pop_weights, 
+                                    Double[] off_weights) {
         
     int[][] a = new int[0][0];
         return a;
@@ -161,7 +163,6 @@ public class GA {
         return entropy
     */
     public static double get_pop_entropy(int[][] pop) {
-        
         return 0.0;
     }
 
@@ -190,9 +191,25 @@ public class GA {
     */
     public static void main(String[] args) {
 
-        int[][] pop = new int[1][200];
+        int[][] pop = init_pop();
         int gen_count = 0;
-        List<Object> pop_eval = evaluate_pop(pop);
+        List<Object> pop_eval = evaluate_pop(pop); //pop_weights, pop_fitness
+        //entropy = get_pop_entropy(pop);
+        Map<Integer, List<Object>> eval_log = new HashMap<Integer, List<Object>>(); 
+        eval_log.put(gen_count, Arrays.asList(pop, pop_eval.get(0), pop_eval.get(1)));
+        // Evolution:
+        while (! do_terminate((Double[]) pop_eval.get(1), gen_count) ) {
+            int[][] parents = select_parents(pop);
+            int[][] offsprings = make_offsprings(parents);
+            List<Object> off_eval = evaluate_pop(offsprings);   //off_weights, off_fitness
+            pop = select_survivors(parents, offsprings, (Double[]) pop_eval.get(1), (Double[]) off_eval.get(1));
+            gen_count += 1;
+            // Store data, gen > 0
+            pop_eval = evaluate_pop(pop);
+            eval_log.put(gen_count, Arrays.asList(pop, pop_eval.get(0), pop_eval.get(1)));
+        }
+            
+        System.out.println("Algorithm succsessfully executed");
 
 
         
