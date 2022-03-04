@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class GA {
 
     private Map<String, Object> params;
@@ -12,13 +13,104 @@ public class GA {
     private int gen_stop;
     private Double p_c;
     private Double p_m;
+
+    private String instance_name;
+    private int nbr_nurses;
+    private int capacity_nurse;
+    private Double benchmark;
+    private Map<String, Integer> depot;
+    private Map<Integer, Map<String, Integer>> patients;
+    private Double[][] travel_times; 
+
     
-    // Set all params
-    public GA (Map<String, Object> params) {
+    // Set all params and read json
+    public GA (Map<String, Object> params, jsonParser jsonParser, String path) {
         this.pop_size = (Integer) params.get("pop_size");
         this.gen_stop = (Integer) params.get("gen_stop");
         this.p_c = (Double) params.get("p_c");
         this.p_m = (Double) params.get("p_m");
+        
+        jsonParser.json_reader(this, path);
+    }
+
+
+    public Double[][] getTravel_times() {
+        return travel_times;
+    }
+
+
+    public void setTravel_times(Double[][] travel_times) {
+        this.travel_times = travel_times;
+    }
+
+
+    public Map<Integer, Map<String, Integer>> getPatients() {
+        return patients;
+    }
+
+
+    public void setPatients(Map<Integer, Map<String, Integer>> patients) {
+        this.patients = patients;
+    }
+
+
+    public Map<String, Integer> getDepot() {
+        return depot;
+    }
+
+
+    public void setDepot(Map<String, Integer> depot) {
+        this.depot = depot;
+    }
+
+
+    public Double getBenchmark() {
+        return benchmark;
+    }
+
+
+    public void setBenchmark(Double benchmark) {
+        this.benchmark = benchmark;
+    }
+
+
+    public int getCapacity_nurse() {
+        return capacity_nurse;
+    }
+
+
+    public void setCapacity_nurse(int capacity_nurse) {
+        this.capacity_nurse = capacity_nurse;
+    }
+
+
+    public int getNbr_nurses() {
+        return nbr_nurses;
+    }
+
+
+    public void setNbr_nurses(int nbr_nurses) {
+        this.nbr_nurses = nbr_nurses;
+    }
+
+
+    public String getInstance_name() {
+        return instance_name;
+    }
+
+
+    public void setInstance_name(String instance_name) {
+        this.instance_name = instance_name;
+    }
+
+    public void testJsonParser() {
+        System.out.println(instance_name);
+        System.out.println(nbr_nurses);
+        System.out.println(capacity_nurse);
+        System.out.println(benchmark);
+        System.out.println(depot);
+        System.out.println(patients);
+        System.out.println(travel_times);
     }
 
 
@@ -168,28 +260,7 @@ public class GA {
 
 
 
-    /*
-    pop = self.init_pop() # numpy array (pop_size, 1)
-    gen_count = 0
-    # Store data, gen 0
-    x, pop_fitness, pop_weights = self.evaluate_pop(pop)
-    entropy = self.get_pop_entropy(pop)
-    eval_log = {gen_count: [pop, pop_weights, x, pop_fitness, entropy]}
-    # Evolution:
-    while not self.do_terminate(pop_fitness, gen_count):
-        parents = self.select_parents(pop)
-        offsprings = self.make_offsprings(parents)
-        _, off_fitness, off_weights = self.evaluate_pop(offsprings)
-        pop = self.select_survivors(parents, offsprings, pop_fitness, off_fitness, self.params['is_high_best'])
-        gen_count += 1
-        # Store data, gen > 0
-        x, pop_fitness, pop_weights = self.evaluate_pop(pop)
-        entropy = self.get_pop_entropy(pop)
-        eval_log[gen_count] = [pop, pop_weights, x, pop_fitness, entropy]
-
-    print('Algorithm succsessfully executed')
-    */
-    public static Map<Integer, List<Object>> main(String[] args) {
+    public Map<Integer, List<Object>> main() {
 
         int[][] pop = init_pop();
         int gen_count = 0;
