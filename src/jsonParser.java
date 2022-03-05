@@ -1,29 +1,23 @@
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+@SuppressWarnings("unchecked")
 
 public class jsonParser {
     
     public void json_reader(GA ga, String path) {
         JSONParser jsonParser = new JSONParser();
         try {
-			Object obj = jsonParser.parse(new FileReader(path));
-			// A JSON object. Key value pairs are unordered. JSONObject supports java.util.Map interface.
-			JSONObject jsonObject = (JSONObject) obj;
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(path));
 
             // Set easy objects
             ga.setInstance_name( (String) jsonObject.get("instance_name"));
-            ga.setNbr_nurses((Integer) jsonObject.get("nbr_nurses"));
-            ga.setCapacity_nurse((Integer) jsonObject.get("capacity_nurse"));
+            ga.setNbr_nurses((Long) jsonObject.get("nbr_nurses"));
+            ga.setCapacity_nurse((Long) jsonObject.get("capacity_nurse"));
             ga.setBenchmark((Double) jsonObject.get("benchmark"));
 
             // Set dict
@@ -34,7 +28,24 @@ public class jsonParser {
             Map<Integer, Map<String, Integer>> patients = (Map<Integer, Map<String, Integer>>) jsonObject.get("patients");
             ga.setPatients(patients);
 
-            Double[][] travel_times = (Double[][]) jsonObject.get("travel_times");
+            // Set nested arrays
+            JSONArray rowsArray = (JSONArray) jsonObject.get("travel_times");
+            int rows = rowsArray.size();
+            Double[][] travel_times = new Double[rows][rows];
+            for (int i=0; i<rows; i++){
+                JSONArray row = (JSONArray) rowsArray.get(i);
+                for (int j=0; j<rows; j++){
+                    Double item;
+                    if (row.get(j) instanceof Long){
+                        Long l = (Long) row.get(j);
+                        item = (double) l;
+                    }
+                    else {
+                        item = (double) row.get(j);
+                    }
+                    travel_times[i][j] = item;
+                }
+            }
             ga.setTravel_times(travel_times);
  
 		} catch (Exception e) {

@@ -15,8 +15,8 @@ public class GA {
     private Double p_m;
 
     private String instance_name;
-    private int nbr_nurses;
-    private int capacity_nurse;
+    private Long nbr_nurses;
+    private Long capacity_nurse;
     private Double benchmark;
     private Map<String, Integer> depot;
     private Map<Integer, Map<String, Integer>> patients;
@@ -74,23 +74,23 @@ public class GA {
     }
 
 
-    public int getCapacity_nurse() {
+    public Long getCapacity_nurse() {
         return capacity_nurse;
     }
 
 
-    public void setCapacity_nurse(int capacity_nurse) {
-        this.capacity_nurse = capacity_nurse;
+    public void setCapacity_nurse(Long long1) {
+        this.capacity_nurse = long1;
     }
 
 
-    public int getNbr_nurses() {
-        return nbr_nurses;
+    public Long getNbr_nurses() {
+        return this.nbr_nurses;
     }
 
 
-    public void setNbr_nurses(int nbr_nurses) {
-        this.nbr_nurses = nbr_nurses;
+    public void setNbr_nurses(Long long1) {
+        this.nbr_nurses = long1;
     }
 
 
@@ -108,9 +108,16 @@ public class GA {
         System.out.println(nbr_nurses);
         System.out.println(capacity_nurse);
         System.out.println(benchmark);
-        System.out.println(depot);
-        System.out.println(patients);
-        System.out.println(travel_times);
+
+        System.out.println("Depot:\n"+ depot.get("x_coord"));
+        System.out.println(depot.get("return_time"));
+        System.out.println(depot.get("y_coord"));
+
+        System.out.println("Patient 42:\n" + patients.get("42").get("start_time"));
+        System.out.println(patients.get("42").get("demand"));
+
+        System.out.println("Travel_times 1,3:\n" + travel_times[1][3]);
+        System.out.println(travel_times.length);
     }
 
 

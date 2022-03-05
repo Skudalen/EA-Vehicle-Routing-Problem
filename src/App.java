@@ -1,13 +1,9 @@
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class App {
 
     public static void setup() {
-
-
-
     }
 
     public static void main(String[] args) throws Exception {
@@ -22,14 +18,15 @@ public class App {
         params.put("gen_stop", 10);
         
         // Setup algorithm
-        String train_path = "/train_0.json/";
+        String train_path = System.getProperty("user.dir") + "/src/train/train_0.json/";
         jsonParser json_parser = new jsonParser();
         GA ga_algorithm = new GA(params, json_parser, train_path);
         
 
         // Run
-        Map<Integer, List<Object>> eval_log = ga_algorithm.main();
-        System.out.println(eval_log.get(10));
+        ga_algorithm.testJsonParser();
+        //Map<Integer, List<Object>> eval_log = ga_algorithm.main();
+        //System.out.println(eval_log.get(10));
     }
 }
 
