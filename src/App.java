@@ -19,8 +19,9 @@ public class App {
         
         // Setup algorithm
         String train_path = System.getProperty("user.dir") + "/src/train/train_0.json/";
-        jsonParser json_parser = new jsonParser();
-        GA ga_algorithm = new GA(params, json_parser, train_path);
+        JSONReader json_parser = new JSONReader();
+        GACustomization custom_GA = new GACustomization();
+        GA ga_algorithm = new GA(params, json_parser, custom_GA, train_path);
         
 
         // Run

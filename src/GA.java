@@ -20,17 +20,20 @@ public class GA {
     private Double benchmark;
     private Map<String, Integer> depot;
     private Map<Integer, Map<String, Integer>> patients;
-    private Double[][] travel_times; 
-
+    private Double[][] travel_times;
     
-    // Set all params and read json
-    public GA (Map<String, Object> params, jsonParser jsonParser, String path) {
+    private GACustomization custom_GA;
+    
+    
+    // CONSTRUCTOR. Set all params and read json
+    public GA (Map<String, Object> params, JSONReader json_reader, GACustomization custom, String path) {
         this.pop_size = (Integer) params.get("pop_size");
         this.gen_stop = (Integer) params.get("gen_stop");
         this.p_c = (Double) params.get("p_c");
         this.p_m = (Double) params.get("p_m");
         
-        jsonParser.json_reader(this, path);
+        json_reader.json_read(this, path);
+        this.custom_GA = custom;
     }
 
 
@@ -127,10 +130,9 @@ public class GA {
         pop = list(map(lambda x: np.binary_repr(x, self.indiv_len), rand_ints))
         return pop
     */
-    public static int[][] init_pop() {
-        
-        int[][] a = new int[200][200];
-        return a;
+    public int[][] init_pop() {
+        int[][] pop = custom_GA.init_pop();
+        return pop;
     }
 
     /*
@@ -263,6 +265,12 @@ public class GA {
     */
     public static double get_pop_entropy(int[][] pop) {
         return 0.0;
+    }
+
+    // IMPORTANT
+    public static boolean is_indiv_valid(int[] indiv) {
+
+        return true;
     }
 
 

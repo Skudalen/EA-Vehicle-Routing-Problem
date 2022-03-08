@@ -1,40 +1,37 @@
-public class GaCustomization {
+public class GACustomization {
     
-    public GaCustomization() {
 
-    }
-
-    public static int[][] init_pop() {
+    public int[][] init_pop() {
         
         int[][] a = new int[200][200];
         return a;
     }
 
-    public static int[][] select_parents(int[][] pop) {
+    public int[][] select_parents(int[][] pop) {
         
         int[][] a = new int[0][0];
             return a;
     }
 
-    public static int[][] crossover(int[][] offsprings) {
+    public int[][] crossover(int[][] offsprings) {
         
         int[][] a = new int[0][0];
             return offsprings;
     }
 
-    public static int[][] mutate(int[][] offsprings) {
+    public int[][] mutate(int[][] offsprings) {
         
         int[][] a = new int[0][0];
             return offsprings;
     }
 
-    public static int[][] make_offsprings(int[][] parents) {
+    public int[][] make_offsprings(int[][] parents) {
         
         int[][] a = new int[0][0];
-            return parents;
+        return parents;
     }
 
-    public static int[][] select_survivors(int[][] parents, 
+    public int[][] select_survivors(int[][] parents, 
     int[][] offsprings, 
     Double[] pop_weights, 
     Double[] off_weights) {

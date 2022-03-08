@@ -7,9 +7,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 @SuppressWarnings("unchecked")
 
-public class jsonParser {
+public class JSONReader {
     
-    public void json_reader(GA ga, String path) {
+    public void json_read(GA ga, String path) {
         JSONParser jsonParser = new JSONParser();
         try {
 			JSONObject jsonObject = (JSONObject) jsonParser.parse(new FileReader(path));
