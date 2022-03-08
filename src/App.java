@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class App {
@@ -7,7 +8,6 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        // Setup data 
 
         // Setting parameters
         Map<String, Object> params = new HashMap<String, Object>();
@@ -24,9 +24,9 @@ public class App {
         
 
         // Run
-        ga_algorithm.testJsonParser();
-        //Map<Integer, List<Object>> eval_log = ga_algorithm.main();
-        //System.out.println(eval_log.get(10));
+        //ga_algorithm.testJsonParser();
+        Map<Integer, List<Object>> eval_log = ga_algorithm.main();
+        System.out.println(eval_log.get(10));
     }
 }
 
