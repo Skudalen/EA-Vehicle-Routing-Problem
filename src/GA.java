@@ -18,7 +18,7 @@ public class GA {
     private Long nbr_nurses;
     private Long capacity_nurse;
     private Double benchmark;
-    private Map<String, Integer> depot;
+    private Map<String, Long> depot;
     private Map<String, Map<String, Long>> patients;
     private Double[][] travel_times;
     private int num_patients = 10;//getPatients().size();
@@ -58,12 +58,12 @@ public class GA {
     }
 
 
-    public Map<String, Integer> getDepot() {
+    public Map<String, Long> getDepot() {
         return depot;
     }
 
 
-    public void setDepot(Map<String, Integer> depot) {
+    public void setDepot(Map<String, Long> depot) {
         this.depot = depot;
     }
 
@@ -126,28 +126,46 @@ public class GA {
     }
 
     public void testMakeIndiv() {
-        int[][] indiv = this.custom_GA.make_indiv((long) 5, 20, (long) 200, this.patients);
+        int[][] indiv = this.custom_GA.make_indiv((long) 5, 20, (long) 200, this.patients, this.depot);
         System.out.println(Arrays.deepToString(indiv));
         System.out.println(indiv[0][19]);
     }
 
     public void testInit_pop(){
-        int[][][] pop = init_pop(5, (long) 5, 40, (long) 200, this.patients);
+        int[][][] pop = init_pop(5, (long) 5, 40, (long) 200, this.patients, this.depot);
         for (int[][] array : pop) {
             System.out.println(Arrays.deepToString(array));
         }
     }
 
+    public void testIsValid(){
+        int[][][] pop = init_pop(1, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
+        int[][] indiv = pop[0];
 
-    /*
-    def init_pop(self):
-        rand_ints = [random.getrandbits(self.indiv_len) for x in range(self.pop_size)]
-        pop = list(map(lambda x: np.binary_repr(x, self.indiv_len), rand_ints))
-        return pop
-    */
+        boolean test = is_indiv_valid(indiv);
+
+        System.out.println(test);
+        System.out.println(Arrays.deepToString(indiv));
+    }
+
+
+    // IMPORTANT
+    public static boolean is_indiv_valid(int[][] indiv) {
+
+
+
+
+        return true;
+    }
+
+    
     public int[][][] init_pop(int pop_size, long nbr_nurses, int num_patients, long capacity_nurse, 
-                                Map<String, Map<String, Long>> patients) {
-        int[][][] pop = custom_GA.init_pop(pop_size, nbr_nurses, num_patients, capacity_nurse, patients);
+                                Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
+        int[][][] pop = new int[pop_size][(int) nbr_nurses][num_patients];
+
+        for (int i=0; i<pop_size; i++) {
+            pop[i] = custom_GA.make_indiv(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+        }
         return pop;
     }
 
@@ -286,17 +304,10 @@ public class GA {
         return 0.0;
     }
 
-    // IMPORTANT
-    public static boolean is_indiv_valid(int[] indiv) {
-
-        return true;
-    }
-
-
 
     public Map<Integer, List<Object>> main() {
 
-        int[][][] pop = init_pop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients);
+        int[][][] pop = init_pop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         int gen_count = 0;
         List<Double[][]> pop_eval = evaluate_pop(pop); //pop_weights, pop_fitness
         Map<Integer, List<Object>> eval_log = new HashMap<Integer, List<Object>>(); 

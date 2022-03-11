@@ -21,7 +21,7 @@ public class JSONReader {
             ga.setBenchmark((Double) jsonObject.get("benchmark"));
 
             // Set dict
-            Map<String, Integer> depot = (Map<String, Integer>) jsonObject.get("depot");
+            Map<String, Long> depot = (Map<String, Long>) jsonObject.get("depot");
             ga.setDepot(depot);
 
             // Set nested dicts

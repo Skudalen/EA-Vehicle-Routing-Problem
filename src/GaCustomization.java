@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 
 public class GACustomization {
 
-    public int[][] make_indiv(long num_nurses, int num_patients, long nurse_cap, Map<String, Map<String, Long>> patients) {
+    public int[][] make_indiv(long num_nurses, int num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
 
         int[][] indiv = new int[(int) (long) num_nurses][num_patients+1];
         List<Integer> patient_ints = new ArrayList<Integer>(IntStream.rangeClosed(1, num_patients)
@@ -19,10 +19,12 @@ public class GACustomization {
             }
             // Initialize with depot (0)
             indiv[i][0] = 0;
-            // Initialize with nurse capacity
+            // Initialize with nurse capacity and return time
             Long cap = nurse_cap;
+            Long rt = depot.get("return_time");
+
             for (int j=1; j<num_patients; j++) {
-                if (cap > 0 && patient_ints.size() > 0) {
+                if (cap > 0 && patient_ints.size() > 0 && rt > 0) {
                     // Select patient randomly
                     int rand_index = ThreadLocalRandom.current().nextInt(0, patient_ints.size());
                     int patient = patient_ints.remove(rand_index);
@@ -30,6 +32,9 @@ public class GACustomization {
                     String patient_str = String.valueOf(patient);
                     Long cap_used = patients.get(patient_str).get("demand");
                     cap -= cap_used;
+                    // Substract time consumption from return time
+                    Long time_used = patients.get(patient_str).get("care_time");
+                    rt -= time_used;
                     // Add patient to nurse
                     indiv[i][j] = patient;
                 }
@@ -41,15 +46,6 @@ public class GACustomization {
         return indiv;
     }
     
-
-    public int[][][] init_pop(int pop_size, long num_nurses, int num_patients, long nurse_cap, Map<String, Map<String, Long>> patients) {
-        int[][][] pop = new int[pop_size][(int) num_nurses][num_patients];
-
-        for (int i=0; i<pop_size; i++) {
-            pop[i] = make_indiv(num_nurses, num_patients, nurse_cap, patients);
-        }
-        return pop;
-    }
 
     public int[][][] select_parents(int[][][] pop) {
         
