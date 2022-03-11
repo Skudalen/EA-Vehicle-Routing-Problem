@@ -13,23 +13,24 @@ public class GACustomization {
         List<Integer> patient_ints = new ArrayList<Integer>(IntStream.rangeClosed(1, num_patients)
                                                     .boxed()
                                                     .collect(Collectors.toList()));
-        System.out.println(patient_ints);
         for (int i=0; i<num_nurses; i++) {
             if (patient_ints.size() < 1) {
                 break;
             }
+            // Initialize with depot (0)
             indiv[i][0] = 0;
+            // Initialize with nurse capacity
             Long cap = nurse_cap;
             for (int j=1; j<num_patients; j++) {
                 if (cap > 0 && patient_ints.size() > 0) {
+                    // Select patient randomly
                     int rand_index = ThreadLocalRandom.current().nextInt(0, patient_ints.size());
-                    //System.out.println(rand_index);
                     int patient = patient_ints.remove(rand_index);
+                    // Substract demand from capacity
                     String patient_str = String.valueOf(patient);
                     Long cap_used = patients.get(patient_str).get("demand");
                     cap -= cap_used;
-                    System.out.println(cap);
-                    System.out.println(patient_ints);
+                    // Add patient to nurse
                     indiv[i][j] = patient;
                 }
                 else {
@@ -44,7 +45,7 @@ public class GACustomization {
     public int[][][] init_pop(int pop_size, long num_nurses, int num_patients, long nurse_cap, Map<String, Map<String, Long>> patients) {
         int[][][] pop = new int[pop_size][(int) num_nurses][num_patients];
 
-        for (int i=0; i>num_patients; i++) {
+        for (int i=0; i<pop_size; i++) {
             pop[i] = make_indiv(num_nurses, num_patients, nurse_cap, patients);
         }
         return pop;

@@ -132,7 +132,7 @@ public class GA {
     }
 
     public void testInit_pop(){
-        int[][][] pop = init_pop(2, (long) 5, 10, (long) 200, patients);
+        int[][][] pop = init_pop(5, (long) 5, 40, (long) 200, this.patients);
         for (int[][] array : pop) {
             System.out.println(Arrays.deepToString(array));
         }
