@@ -145,9 +145,9 @@ public class GA {
         int[][][] pop = init_pop(1, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         int[][] indiv = pop[0];
 
-        boolean test = is_indiv_valid(indiv);
+        Double tt = indiv_ValidTravel(indiv, this.patients, this.depot, this.travel_times);
 
-        System.out.println(test);
+        System.out.println(tt);
         System.out.println(Arrays.deepToString(indiv));
     }
 
@@ -156,12 +156,44 @@ public class GA {
 
 
     // IMPORTANT
-    public static boolean is_indiv_valid(int[][] indiv) {
+    public static double indiv_ValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
+        //ArrayList<Object> result = new ArrayList<Object>();
+        //result.add(0);
+        Double rt = (double) depot.get("return_time");
+        Double tt_total = 0.0;
 
-
-
-
-        return true;
+        for (int[] nurse : indiv) { 
+            double time = 0;
+            double travel_time = 0;
+            int last_patient = 0;
+            for (int patient : nurse) {
+                String patient_str = String.valueOf(patient);
+                // add travel time
+                double travel = (double) travel_times[last_patient][patient];
+                time += travel;
+                travel_time += travel;
+                // def start time and wait to that
+                double start_time = (double) patients.get(patient_str).get("start_time");
+                double end_time = (double) patients.get(patient_str).get("end_time");
+                double wait_time = (start_time - time);
+                if (start_time > time) time += wait_time;
+                // Not valid if the nurse arrives after end_time
+                if (time > end_time) return 0.0;
+                // Add care_time
+                double care_time = (double) patients.get(patient_str).get("care_time");
+                time += care_time;
+                // Not valid if the nurse finishes after end_time
+                if (time > end_time) return 0.0;
+                // -----
+                // Valid and patient travel_time is added
+            }
+            // Not valid if nurse is not back within the return_time
+            if (time > rt) return 0.0;
+            // -----
+            // Valid and nurse travel_time is added
+            tt_total += travel_time;
+        }
+        return tt_total;
     }
 
     

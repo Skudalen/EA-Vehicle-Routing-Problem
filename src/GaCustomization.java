@@ -18,7 +18,8 @@ public class GACustomization {
                 break;
             }
             // Initialize with depot (0)
-            indiv[i][0] = 0;
+            //indiv[i][0] = 0;
+            
             // Initialize with nurse capacity and return time
             Long cap = nurse_cap;
             Long rt = depot.get("return_time");
