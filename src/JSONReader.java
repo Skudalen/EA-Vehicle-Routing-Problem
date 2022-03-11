@@ -25,7 +25,7 @@ public class JSONReader {
             ga.setDepot(depot);
 
             // Set nested dicts
-            Map<Integer, Map<String, Integer>> patients = (Map<Integer, Map<String, Integer>>) jsonObject.get("patients");
+            Map<String, Map<String, Long>> patients = (Map<String, Map<String, Long>>) jsonObject.get("patients");
             ga.setPatients(patients);
 
             // Set nested arrays

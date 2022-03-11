@@ -26,8 +26,11 @@ public class App {
 
         // Run
         //ga_algorithm.testJsonParser();
-        Map<Integer, List<Object>> eval_log = ga_algorithm.main();
-        System.out.println(eval_log.get(10));
+        //ga_algorithm.testMakeIndiv();
+        //ga_algorithm.testInit_pop();
+        
+        //Map<Integer, List<Object>> eval_log = ga_algorithm.main();
+        //System.out.println(eval_log.get(10));
     }
 }
 
