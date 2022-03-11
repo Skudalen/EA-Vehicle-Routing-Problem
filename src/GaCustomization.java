@@ -7,10 +7,10 @@ import java.util.stream.IntStream;
 
 public class GACustomization {
 
-    public int[][] make_indiv(long num_nurses, int num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
+    public int[][] make_indiv(long num_nurses, long num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
 
-        int[][] indiv = new int[(int) (long) num_nurses][num_patients+1];
-        List<Integer> patient_ints = new ArrayList<Integer>(IntStream.rangeClosed(1, num_patients)
+        int[][] indiv = new int[(int) (long) num_nurses][(int)num_patients+1];
+        List<Integer> patient_ints = new ArrayList<Integer>(IntStream.rangeClosed(1, (int)num_patients)
                                                     .boxed()
                                                     .collect(Collectors.toList()));
         for (int i=0; i<num_nurses; i++) {

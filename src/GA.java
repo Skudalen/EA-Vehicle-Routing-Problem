@@ -1,6 +1,7 @@
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class GA {
     private Map<String, Long> depot;
     private Map<String, Map<String, Long>> patients;
     private Double[][] travel_times;
-    private int num_patients = 10;//getPatients().size();
+    private Long num_patients;
     
     private GACustomization custom_GA;
     
@@ -35,6 +36,8 @@ public class GA {
         
         json_reader.json_read(this, path);
         this.custom_GA = custom;
+
+        this.num_patients = (long) this.patients.size();
     }
 
 
@@ -132,7 +135,7 @@ public class GA {
     }
 
     public void testInit_pop(){
-        int[][][] pop = init_pop(5, (long) 5, 40, (long) 200, this.patients, this.depot);
+        int[][][] pop = init_pop(pop_size=5, nbr_nurses=(long)5, num_patients=(long)40, capacity_nurse=(long)200, this.patients, this.depot);
         for (int[][] array : pop) {
             System.out.println(Arrays.deepToString(array));
         }
@@ -149,6 +152,9 @@ public class GA {
     }
 
 
+    // ------------------------- MAIN METHODS -----------------------------
+
+
     // IMPORTANT
     public static boolean is_indiv_valid(int[][] indiv) {
 
@@ -159,9 +165,9 @@ public class GA {
     }
 
     
-    public int[][][] init_pop(int pop_size, long nbr_nurses, int num_patients, long capacity_nurse, 
+    public int[][][] init_pop(int pop_size, long nbr_nurses, long num_patients, long capacity_nurse, 
                                 Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
-        int[][][] pop = new int[pop_size][(int) nbr_nurses][num_patients];
+        int[][][] pop = new int[pop_size][(int)nbr_nurses][(int)num_patients];
 
         for (int i=0; i<pop_size; i++) {
             pop[i] = custom_GA.make_indiv(nbr_nurses, num_patients, capacity_nurse, patients, depot);
