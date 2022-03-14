@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -9,20 +10,18 @@ public class GACustomization {
 
     public int[][] make_indiv(long num_nurses, long num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
 
-        int[][] indiv = new int[(int) (long) num_nurses][(int)num_patients+1];
+        int[][] indiv = new int[(int) num_nurses][];
         List<Integer> patient_ints = new ArrayList<Integer>(IntStream.rangeClosed(1, (int)num_patients)
                                                     .boxed()
                                                     .collect(Collectors.toList()));
         for (int i=0; i<num_nurses; i++) {
-            if (patient_ints.size() < 1) {
-                break;
-            }
-            // Initialize with depot (0)
-            //indiv[i][0] = 0;
-            
+
             // Initialize with nurse capacity and return time
             Long cap = nurse_cap;
             Long rt = depot.get("return_time");
+
+            // Initialize with nurse capacity and return time
+            List<Integer> nurse_list = new ArrayList<Integer>();
 
             for (int j=1; j<num_patients; j++) {
                 if (cap > 0 && patient_ints.size() > 0 && rt > 0) {
@@ -37,12 +36,20 @@ public class GACustomization {
                     Long time_used = patients.get(patient_str).get("care_time");
                     rt -= time_used;
                     // Add patient to nurse
-                    indiv[i][j] = patient;
+                    nurse_list.add(patient);
+                    //indiv[i][j] = patient;
                 }
                 else {
                     break;
                 }
             }
+            if (nurse_list.size()>0) {
+                indiv[i] = nurse_list.stream().mapToInt(x -> x).filter(x -> x != 0.0).toArray();
+            }
+            else {
+                indiv[i] = new int[0];
+            }
+            //System.out.println(Arrays.deepToString(indiv));
         }
         return indiv;
     }

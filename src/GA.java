@@ -202,7 +202,8 @@ public class GA {
         int[][][] pop = new int[pop_size][(int)nbr_nurses][(int)num_patients];
 
         for (int i=0; i<pop_size; i++) {
-            pop[i] = custom_GA.make_indiv(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+            int[][] indiv = custom_GA.make_indiv(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+            pop[i] = indiv;
         }
         return pop;
     }
