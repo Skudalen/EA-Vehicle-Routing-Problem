@@ -16,6 +16,7 @@ public class App {
         params.put("p_c", 0.6);
         params.put("gen_stop", 10);
         params.put("nurse_cut", 0.2);
+        params.put("worst_traveltime", 10000);
         
         // Setup algorithm
         String train_path = System.getProperty("user.dir") + "/src/train/train_0.json/";
@@ -27,9 +28,10 @@ public class App {
         // Run
         //ga_algorithm.testJsonParser();
         //ga_algorithm.testMakeIndiv_BASE();
-        ga_algorithm.testMakeIndiv_RandCut();
-        //ga_algorithm.testInit_pop();
-        //ga_algorithm.testIsValid();
+        //ga_algorithm.testMakeIndiv_RandCut();
+        //ga_algorithm.testInitPop_BASE();
+        //ga_algorithm.testInitPop_RandCut();
+        ga_algorithm.testIsValid();
         
         //Map<Integer, List<Object>> eval_log = ga_algorithm.main();
         //System.out.println(eval_log.get(10));

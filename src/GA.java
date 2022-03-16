@@ -25,8 +25,13 @@ public class GA {
     private Map<String, Map<String, Long>> patients;
     private Double[][] travel_times;
     private Long num_patients;
+    private Double worst_traveltime;
+
     // -------------------------------
     private GACustomization custom_GA;
+    // -------------------------------
+    private Double[] popFitness;
+    private Double[] offFitness;
     
     
     // CONSTRUCTOR. Set all params and read json
@@ -35,6 +40,7 @@ public class GA {
         this.gen_stop = (Integer) params.get("gen_stop");
         this.p_c = (Double) params.get("p_c");
         this.p_m = (Double) params.get("p_m");
+        this.worst_traveltime = (double) (int) params.get("worst_traveltime");
         // -------------------------------
         json_reader.json_read(this, path);
         this.custom_GA = custom;
@@ -112,6 +118,8 @@ public class GA {
         this.instance_name = instance_name;
     }
 
+    // ------------------------- TESTING METHODS -----------------------------
+
     public void testJsonParser() {
         System.out.println(instance_name);
         System.out.println(nbr_nurses);
@@ -141,15 +149,27 @@ public class GA {
         //System.out.println(indiv[0][0]);
     }
 
-    public void testInitPop(){
+    public void testInitPop_BASE(){
         int[][][] pop = initPop(pop_size=5, nbr_nurses=(long)25, num_patients=(long)100, capacity_nurse=(long)200, this.patients, this.depot);
         for (int[][] array : pop) {
             System.out.println(Arrays.deepToString(array));
         }
     }
 
+    public void testInitPop_RandCut(){
+        int[][][] pop = new int[pop_size][(int)25][(int)100];
+
+        for (int i=0; i<pop_size; i++) {
+            int[][] indiv = custom_GA.makeIndiv_BASE(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+            pop[i] = indiv;
+        }
+        for (int[][] array : pop) {
+            System.out.println(Arrays.deepToString(array));
+        }
+    }
+
     public void testIsValid(){
-        int pop_size = 1000;
+        int pop_size = 100;
         //int[][][] pop = init_pop(pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         int[][][] pop = initPop(pop_size, 5, 10, 200, this.patients, this.depot);
         List<Double> test = IntStream.range(0,pop_size)
@@ -159,7 +179,7 @@ public class GA {
         System.out.println(test);
         int[][][] valid_indivs = new int[pop_size][][];
         for (int i=0; i < pop.length; i++) {
-            if (test.get(i) < Double.POSITIVE_INFINITY) {
+            if (test.get(i) < this.worst_traveltime) {
                 valid_indivs[i] = pop[i];
             }
         }
@@ -171,7 +191,7 @@ public class GA {
 
 
     // IMPORTANT
-    public static double checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
+    public double checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
         //ArrayList<Object> result = new ArrayList<Object>();
         //result.add(0);
         Double rt = (double) depot.get("return_time");
@@ -193,17 +213,17 @@ public class GA {
                 double wait_time = (start_time - time);
                 if (start_time > time) time += wait_time;
                 // Not valid if the nurse arrives after end_time
-                if (time > end_time) return Double.POSITIVE_INFINITY;
+                if (time > end_time) return this.worst_traveltime;
                 // Add care_time
                 double care_time = (double) patients.get(patient_str).get("care_time");
                 time += care_time;
                 // Not valid if the nurse finishes after end_time
-                if (time > end_time) return Double.POSITIVE_INFINITY;
+                if (time > end_time) return this.worst_traveltime;
                 // -----
                 // Valid and patient travel_time is added
             }
             // Not valid if nurse is not back within the return_time
-            if (time > rt) return Double.POSITIVE_INFINITY;
+            if (time > rt) return this.worst_traveltime;
             // -----
             // Valid and nurse travel_time is added
             tt_total += travel_time;
@@ -363,6 +383,7 @@ public class GA {
 
         int[][][] pop = initPop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         int gen_count = 0;
+        this.popFitness = new Double[this.pop_size];
         List<Double[][]> pop_eval = evaluatePop(pop); //pop_weights, pop_fitness
         Map<Integer, List<Object>> eval_log = new HashMap<Integer, List<Object>>(); 
         eval_log.put(gen_count, Arrays.asList(pop, pop_eval.get(0), pop_eval.get(1)));
