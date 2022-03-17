@@ -330,35 +330,22 @@ public class GA {
         return off_info;
     }
 
-    /*
-    def make_offsprings(self, parents):
-        offsprings = self.crossover(parents)
-        offsprings_mod = self.mutate(offsprings)
-        return offsprings_mod
-    */
     public List<Object> makeOffsprings(int[][][] parents) {
-        
-        List<Object> offsprings = Arrays.asList(0);
-        return offsprings;
+        int[][][] offsprings = doCrossover(parents);
+        List<Object> off_info = mutate(offsprings);
+        return off_info;
     }
     
-    /*
-    def select_survivors(self, parents, offsprings, pop_weights, off_weights, is_high_best):
-        if self.survival_selecter:
-            return self.survival_selecter(parents, offsprings, pop_weights, off_weights, is_high_best)
-        else:   # Default: generational survival selection 
-            return offsprings
-    */
-    public List<Object> selectSurvivors(int[][][] pop, 
-                                    int[][][] offsprings, 
-                                    double[] pop_weights, 
-                                    double[] off_weights) {
-        
-        List<Object> survivors = custom_GA.selectSurvivors(pop,
-                                                        offsprings,
-                                                        pop_weights,
-                                                        off_weights);
-        return survivors;
+    public List<Object> selectSurvivors(int[][][] pop, int[][][] offsprings, 
+                                    double[] pop_weights, double[] off_weights) {
+        List<Object> pop_info;
+        if (params.get("how_selSurv") == "X") {
+            pop_info = custom_GA.selectSurvivors_BASE(pop, offsprings, pop_weights, off_weights);
+        }
+        else {
+            pop_info = custom_GA.selectSurvivors_BASE(pop, offsprings, pop_weights, off_weights);
+        }
+        return pop_info;
     }
 
 

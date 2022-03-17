@@ -246,11 +246,15 @@ public class GACustomization {
         return off_info;
     }
 
+    // Genaralized Crowding
+    public List<Object> selectSurvivors_BASE(int[][][] parents, int[][][] offsprings, 
+                                    double[] pop_weights, double[] off_weights) {
+        // Get phi to GC
+        double phi = (double) params.get("GC_phi");
+        
 
-    public List<Object> selectSurvivors(int[][][] parents, 
-                                    int[][][] offsprings, 
-                                    double[] pop_weights, 
-                                    double[] off_weights) {
+
+        
 
         List<Object> offspr = Arrays.asList(0);
         return offspr;
