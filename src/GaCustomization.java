@@ -2,7 +2,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -85,7 +84,7 @@ public class GACustomization {
         return indiv;
     }
     
-    public int[][] makeIndiv_randCut(long num_nurses, long num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
+    public int[][] makeIndiv_RANDCUT(long num_nurses, long num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
         // Make return object shell 
         int[][] indiv = new int[(int) num_nurses][];
         // Make list of all patients to be assigned

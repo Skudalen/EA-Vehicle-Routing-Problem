@@ -17,6 +17,13 @@ public class App {
         params.put("gen_stop", 10);
         params.put("nurse_cut", 0.2);
         params.put("worst_traveltime", 10000);
+        // --------------------------------------
+        params.put("how_indiv", "RandCut");
+        params.put("how_selPar", "RandCut");
+        params.put("how_doCross", "RandCut");
+        params.put("how_mutate", "RandCut");
+        params.put("how_makeOff", "RandCut");
+        params.put("how_selSurv", "RandCut");
         
         // Setup algorithm
         String train_path = System.getProperty("user.dir") + "/src/train/train_0.json/";
