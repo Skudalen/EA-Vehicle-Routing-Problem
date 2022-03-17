@@ -154,28 +154,8 @@ public class GACustomization {
         return pop;
     }
 
-    /*
-    def crossover(self, parents):
-        offsprings = []
-        for i in range(0, self.num_parents-1, 2):
-            parent1 = parents[i]
-            parent2 = parents[i+1]
-            crosspoint = None
-            for k in range(1, self.indiv_len-1):
-                temp = random.choices([1, 0], weights=[self.p_c, 1 - self.p_c])
-                if temp[0] == 1:
-                    crosspoint = k
-                    break
-            if crosspoint:
-                child1 = parent1[:crosspoint] + parent2[crosspoint:]
-                child2 = parent2[:crosspoint] + parent1[crosspoint:]
-                offsprings.extend([child1, child2])
-            else:
-                offsprings.extend([parent1, parent2])
-        return offsprings
-    */
+    // One-point Crossover
     public int[][][] doCrossover_BASE(int[][][] pop) {
-
         // Retrive the prob for crossover 
         double p_c = (double) params.get("p_c");
         List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
@@ -190,6 +170,8 @@ public class GACustomization {
                 // Choose a nurse pair 
                 int[] nurse1 = parent1[j];
                 int[] nurse2 = parent2[j];
+                // Break if one nurse has no patients
+                if (nurse1.length < 1 || nurse2.length < 1) break;
                 // Determine the longest and shortest
                 int[] shortest = nurse1; 
                 int[] longest = nurse2; 
@@ -224,10 +206,53 @@ public class GACustomization {
         return pop;
     }
 
-    public int[][][] mutate(int[][][] offsprings) {
-        
-        int[][][] offsprings_mod = new int[0][0][0];
-            return offsprings_mod;
+    /*
+    def mutate(self, offsprings:list):
+        offsprings_mod = []
+        for indiv in offsprings:
+            new_indiv = indiv
+            for i in range(len(indiv)):
+                temp = random.choices([1, 0], weights=[self.p_m, 1 - self.p_m])
+                if temp[0] == 1:
+                    if new_indiv[i] == '0': 
+                        new_indiv = indiv[:i] + '1' + indiv[i+1:]  
+                    else: 
+                        new_indiv = indiv[:i] + '0' + indiv[i+1:]
+            offsprings_mod.append(new_indiv)
+        return offsprings_mod
+    */
+    // Swap Mutation
+    public int[][][] mutate_BASE(int[][][] offsprings) {
+        // Retrive the prob for crossover 
+        double p_m = (double) params.get("p_m");
+        List<Double> doMuteProb = Arrays.asList(1-p_m, p_m);
+        // Iterate each indiv, set of nurses
+        for (int i=0; i<offsprings.length; i++) {
+            int[][] indiv = offsprings[i];
+            // Iterate each nurse 
+            for (int j=0; j<indiv.length; j++) {
+                int[] nurse = indiv[j];
+                int point1 = -1;
+                int point2 = -1;
+                // Iterate each patient to find mutation point
+                int point_counter = 0;
+                for (int k=0; k<nurse.length; k++) {
+                    // Determine if this index k is the mutation point
+                    int temp = getByWeight(doMuteProb);
+                    if (temp == 1) {
+                        if (point_counter == 0) point1 = k;
+                        else if (point_counter == 1) point2 = k;
+                        else break;
+                    }
+                }
+                // Set mutation
+                if (point1 != -1 && point2 != -1) {
+                    offsprings[i][j][point1] = offsprings[i][j][point2];
+                    offsprings[i][j][point2] = offsprings[i][j][point1];
+                }
+            }
+        }
+        return offsprings;
     }
 
 
