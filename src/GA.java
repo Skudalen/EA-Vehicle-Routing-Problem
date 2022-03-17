@@ -297,22 +297,15 @@ public class GA {
         return gen_count > this.gen_stop;
     }
 
-
-
-    /*
-    def select_parents(self, pop):
-        # Stocastic
-        _, _, weights = self.evaluate_pop(pop)
-        #fitness_sum = sum(pop_fitness)
-        #weights = np.divide(pop_fitness, fitness_sum)
-        #print('\nWeights used to select parents based on normalized fitness:\n', weights)
-        parents = random.choices(pop, weights=weights, k=self.num_parents)
-        return parents
-    */
-    public int[][][] selectParents(int[][][] pop, Double[] pop_weights) {
-        
-    int[][][] a = custom_GA.selectParents(pop);
-        return a;
+    public int[][][] selectParents(int[][][] pop, double[] pop_weights) {
+        int[][][] parents;
+        if (params.get("how_selPar") == "X") {
+            parents = custom_GA.selectParents_BASE(pop, pop_weights);
+        }
+        else {
+            parents = custom_GA.selectParents_BASE(pop, pop_weights);
+        }
+        return parents;
     }
 
     /*
@@ -383,8 +376,8 @@ public class GA {
     */
     public List<Object> selectSurvivors(int[][][] pop, 
                                     int[][][] offsprings, 
-                                    Double[] pop_weights, 
-                                    Double[] off_weights) {
+                                    double[] pop_weights, 
+                                    double[] off_weights) {
         
         List<Object> survivors = custom_GA.selectSurvivors(pop,
                                                         offsprings,
@@ -423,7 +416,7 @@ public class GA {
         int[][][] pop = (int[][][]) pop_info.get(0);
         double[] pop_fitness = (double[]) pop_info.get(1);
         // Get population weights and return {pop_weights}
-        Double[] pop_weights = getPopWeights(pop_info);
+        double[] pop_weights = getPopWeights(pop_info);
         // Add the first log at gen=0 -> gen_count:{pop, pop_weights, pop_fitness}
         List<List<Object>> eval_log = Arrays.asList(Arrays.asList(pop, pop_fitness, pop_weights));
 
@@ -438,7 +431,7 @@ public class GA {
             int[][][] offprings = (int[][][]) offsprings_info.get(0);
         //Double[] off_fitness = (Double[]) offsprings_info.get(1);
             // Get offspring weights and return {off_weights}
-            Double[] off_weights = getPopWeights(offsprings_info);
+            double[] off_weights = getPopWeights(offsprings_info);
             pop_info = selectSurvivors(pop, offprings, pop_weights, off_weights);
 
             // -------UPDATING-------:

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
@@ -141,11 +142,23 @@ public class GACustomization {
         return indiv;
     }
 
-
-    public int[][][] selectParents(int[][][] pop) {
-        
-        int[][][] parents = new int[0][0][0];
-            return parents;
+     /*
+    def select_parents(self, pop):
+        # Stocastic
+        _, _, weights = self.evaluate_pop(pop)
+        #fitness_sum = sum(pop_fitness)
+        #weights = np.divide(pop_fitness, fitness_sum)
+        #print('\nWeights used to select parents based on normalized fitness:\n', weights)
+        parents = random.choices(pop, weights=weights, k=self.num_parents)
+        return parents
+    */
+    public int[][][] selectParents_BASE(int[][][] pop, double[] pop_weights) {
+        List<Double> weights = DoubleStream.of(pop_weights).boxed().collect(Collectors.toList());
+        for (int i=0; i < pop.length; i++) {
+            int[][] child = pop[getByWeight(weights)];
+            pop[i] = child;
+        }
+        return pop;
     }
 
     public int[][][] doCrossover(int[][][] offsprings) {
@@ -163,8 +176,8 @@ public class GACustomization {
 
     public List<Object> selectSurvivors(int[][][] parents, 
                                     int[][][] offsprings, 
-                                    Double[] pop_weights, 
-                                    Double[] off_weights) {
+                                    double[] pop_weights, 
+                                    double[] off_weights) {
 
         List<Object> offspr = Arrays.asList(0);
         return offspr;
