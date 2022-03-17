@@ -15,8 +15,6 @@ public class GA {
     private Map<String, Object> params;
     private int pop_size;
     private int gen_stop;
-    private Double p_c;
-    private Double p_m;
     // -------------------------------
     private String instance_name;
     private Long nbr_nurses;
@@ -31,17 +29,13 @@ public class GA {
     // -------------------------------
     private GACustomization custom_GA;
     // -------------------------------
-    private Double[] popFitness;
-    private Double[] offFitness;
-    private Double[] popWeights;
+ 
     
     
     // CONSTRUCTOR. Set all params and read json
     public GA (Map<String, Object> params, JSONReader json_reader, GACustomization custom, String path) {
         this.pop_size = (Integer) params.get("pop_size");
         this.gen_stop = (Integer) params.get("gen_stop");
-        this.p_c = (Double) params.get("p_c");
-        this.p_m = (Double) params.get("p_m");
         this.worst_traveltime = (double) (int) params.get("worst_traveltime");
         // -------------------------------
         json_reader.json_read(this, path);

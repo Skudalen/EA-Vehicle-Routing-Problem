@@ -31,6 +31,29 @@ public class GACustomization {
         return selected_int;
     }
 
+    public double getIndivDiff(int[][] indiv1, int[][] indiv2) {
+        double diff = 0;
+        int[] shortest;
+        int[] longest;
+        for (int i=0; i<indiv1.length; i++) {
+            int[] nurse1 = indiv1[i];
+            int[] nurse2 = indiv2[i];
+            if (nurse1.length < nurse2.length) {
+                shortest = nurse1;
+                longest = nurse2;
+            }
+            else {
+                shortest = nurse2;
+                longest = nurse1;
+            }
+            diff += longest.length - shortest.length;
+            for (int j=0; j<shortest.length; j++) {
+                if (nurse1[j] != nurse2[j]) diff += 1;
+            }
+        }
+        return diff;    
+    }
+
 
     // ----------------------------- CustomGA Methods -------------------------------
 
@@ -249,7 +272,8 @@ public class GACustomization {
     // Genaralized Crowding
     public List<Object> selectSurvivors_BASE(int[][][] parents, int[][][] offsprings, 
                                     double[] pop_weights, double[] off_weights) {
-        // Get phi to GC
+        
+                                        // Get phi to GC
         double phi = (double) params.get("GC_phi");
         
 
