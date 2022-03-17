@@ -308,30 +308,17 @@ public class GA {
         return parents;
     }
 
-    /*
-    def crossover(self, parents):
-        offsprings = []
-        for i in range(0, self.num_parents-1, 2):
-            parent1 = parents[i]
-            parent2 = parents[i+1]
-            crosspoint = None
-            for k in range(1, self.indiv_len-1):
-                temp = random.choices([1, 0], weights=[self.p_c, 1 - self.p_c])
-                if temp[0] == 1:
-                    crosspoint = k
-                    break
-            if crosspoint:
-                child1 = parent1[:crosspoint] + parent2[crosspoint:]
-                child2 = parent2[:crosspoint] + parent1[crosspoint:]
-                offsprings.extend([child1, child2])
-            else:
-                offsprings.extend([parent1, parent2])
-        return offsprings
-    */
-    public int[][][] doCrossover(int[][][] offsprings) {
-        
-    int[][][] offsprings_mod = custom_GA.doCrossover(offsprings);
-        return offsprings_mod;
+    
+    public int[][][] doCrossover(int[][][] parents) {
+       
+        int[][][] offsprings;
+        if (params.get("how_doCross") == "X") {
+            offsprings = custom_GA.doCrossover_BASE(parents);
+        }
+        else {
+            offsprings = custom_GA.doCrossover_BASE(parents);
+        }
+        return offsprings;
     }
 
     /*

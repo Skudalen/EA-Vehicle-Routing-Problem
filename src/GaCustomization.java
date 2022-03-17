@@ -2,13 +2,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
+
 
 public class GACustomization {
 
@@ -142,16 +145,6 @@ public class GACustomization {
         return indiv;
     }
 
-     /*
-    def select_parents(self, pop):
-        # Stocastic
-        _, _, weights = self.evaluate_pop(pop)
-        #fitness_sum = sum(pop_fitness)
-        #weights = np.divide(pop_fitness, fitness_sum)
-        #print('\nWeights used to select parents based on normalized fitness:\n', weights)
-        parents = random.choices(pop, weights=weights, k=self.num_parents)
-        return parents
-    */
     public int[][][] selectParents_BASE(int[][][] pop, double[] pop_weights) {
         List<Double> weights = DoubleStream.of(pop_weights).boxed().collect(Collectors.toList());
         for (int i=0; i < pop.length; i++) {
@@ -161,10 +154,74 @@ public class GACustomization {
         return pop;
     }
 
-    public int[][][] doCrossover(int[][][] offsprings) {
-        
-        int[][][] offsprings_mod = new int[1][1][1];
-            return offsprings_mod;
+    /*
+    def crossover(self, parents):
+        offsprings = []
+        for i in range(0, self.num_parents-1, 2):
+            parent1 = parents[i]
+            parent2 = parents[i+1]
+            crosspoint = None
+            for k in range(1, self.indiv_len-1):
+                temp = random.choices([1, 0], weights=[self.p_c, 1 - self.p_c])
+                if temp[0] == 1:
+                    crosspoint = k
+                    break
+            if crosspoint:
+                child1 = parent1[:crosspoint] + parent2[crosspoint:]
+                child2 = parent2[:crosspoint] + parent1[crosspoint:]
+                offsprings.extend([child1, child2])
+            else:
+                offsprings.extend([parent1, parent2])
+        return offsprings
+    */
+    public int[][][] doCrossover_BASE(int[][][] pop) {
+
+        // Retrive the prob for crossover 
+        double p_c = (double) params.get("p_c");
+        List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
+        // Iterate each individual
+        for (int i=0; i<pop.length-1; i+=2) {
+            // Choose two parents 
+            int[][] parent1 = pop[i];
+            int[][] parent2 = pop[i+1];
+            // Iterate each nurse pair 
+            for (int j=0; j<parent1.length; j++) {
+                int crosspoint = 0;
+                // Choose a nurse pair 
+                int[] nurse1 = parent1[j];
+                int[] nurse2 = parent2[j];
+                // Determine the longest and shortest
+                int[] shortest = nurse1; 
+                int[] longest = nurse2; 
+                if (nurse2.length < nurse1.length) {
+                    shortest = nurse2;
+                    longest = nurse1;
+                }
+                // Iterate each patient for each nurse
+                for (int k=0; k<shortest.length; k++) {
+                    // Determine if this index k is the crosspoint
+                    int temp = getByWeight(doCrossProb);
+                    if (temp == 1) {
+                        crosspoint = k;
+                        break;
+                    }
+                }
+                // Do crossover if k was chosen
+                if (crosspoint != 0) {
+                    int[] nurse1_1 = Arrays.copyOfRange(nurse1, 0, crosspoint);
+                    int[] nurse2_2 = Arrays.copyOfRange(nurse2, crosspoint, longest.length);
+                    nurse1 = ArrayUtils.addAll(nurse1_1, nurse2_2);
+
+                    int[] nurse2_1 = Arrays.copyOfRange(nurse2, 0, crosspoint);
+                    int[] nurse1_2 = Arrays.copyOfRange(nurse1, crosspoint, longest.length);
+                    nurse2 = ArrayUtils.addAll(nurse2_1, nurse1_2);
+                    
+                    pop[i][j] = nurse1;
+                    pop[i+1][j] = nurse2;
+                }
+            }
+        }
+        return pop;
     }
 
     public int[][][] mutate(int[][][] offsprings) {
