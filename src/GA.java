@@ -253,8 +253,7 @@ public class GA {
 
 
     public double[] getPopWeights(List<Object> pop_info){
-
-        int[][][] pop = (int[][][]) pop_info.get(0);
+        //int[][][] pop = (int[][][]) pop_info.get(0);
         List<Double> pop_fitness = Arrays.asList( (Double[]) pop_info.get(1) );
 
         // Scale from low-best to high-best
@@ -287,7 +286,7 @@ public class GA {
     
     public List<Double[]> evaluatePop(List<Object> pop) {
         
-    Double[] a = new Double[this.pop_size];
+        Double[] a = new Double[this.pop_size];
         return Arrays.asList(a, a);
     }
 
@@ -405,7 +404,6 @@ public class GA {
             List<Object> offsprings_info = makeOffsprings(parents);
             // Create var for the offsprings and off_fitness
             int[][][] offprings = (int[][][]) offsprings_info.get(0);
-        //Double[] off_fitness = (Double[]) offsprings_info.get(1);
             // Get offspring weights and return {off_weights}
             double[] off_weights = getPopWeights(offsprings_info);
             pop_info = selectSurvivors(pop, offprings, pop_weights, off_weights);

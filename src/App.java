@@ -17,6 +17,7 @@ public class App {
         params.put("gen_stop", 10);
         params.put("nurse_cut", 0.2);
         params.put("worst_traveltime", 10000);
+        params.put("GC_phi", 0.5);
         // --------------------------------------
         params.put("how_indiv", "RandCut");
         params.put("how_selPar", "RandCut");
