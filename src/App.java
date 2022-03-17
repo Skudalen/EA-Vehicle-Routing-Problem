@@ -9,7 +9,7 @@ public class App {
 
     public static void main(String[] args) throws Exception {
 
-        // Setting parameters
+        // ----- Setting parameters -----
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("pop_size", 10);
         params.put("p_m", 0.1);
@@ -25,21 +25,22 @@ public class App {
         params.put("how_makeOff", "RandCut");
         params.put("how_selSurv", "RandCut");
         
-        // Setup algorithm
+        // ----- Setup algorithm -----
         String train_path = System.getProperty("user.dir") + "/src/train/train_0.json/";
         JSONReader json_parser = new JSONReader();
         GACustomization custom_GA = new GACustomization(params);
         GA ga_algorithm = new GA(params, json_parser, custom_GA, train_path);
         
 
-        // Run
+        // ----- Run tests -----
         //ga_algorithm.testJsonParser();
         //ga_algorithm.testMakeIndiv_BASE();
         //ga_algorithm.testMakeIndiv_RandCut();
         //ga_algorithm.testInitPop_BASE();
         //ga_algorithm.testInitPop_RandCut();
-        ga_algorithm.testIsValid();
+        //ga_algorithm.testIsValid();
         
+        // ----- Main ------
         //Map<Integer, List<Object>> eval_log = ga_algorithm.main();
         //System.out.println(eval_log.get(10));
     }

@@ -206,23 +206,11 @@ public class GACustomization {
         return pop;
     }
 
-    /*
-    def mutate(self, offsprings:list):
-        offsprings_mod = []
-        for indiv in offsprings:
-            new_indiv = indiv
-            for i in range(len(indiv)):
-                temp = random.choices([1, 0], weights=[self.p_m, 1 - self.p_m])
-                if temp[0] == 1:
-                    if new_indiv[i] == '0': 
-                        new_indiv = indiv[:i] + '1' + indiv[i+1:]  
-                    else: 
-                        new_indiv = indiv[:i] + '0' + indiv[i+1:]
-            offsprings_mod.append(new_indiv)
-        return offsprings_mod
-    */
     // Swap Mutation
-    public int[][][] mutate_BASE(int[][][] offsprings) {
+    public List<Object> mutate_BASE(int[][][] offsprings, GA ga) {
+        // Initialize off_info list and off_fitness array
+        List<Object> off_info = new ArrayList<>();
+        double[] off_fitness = new double[offsprings.length];
         // Retrive the prob for crossover 
         double p_m = (double) params.get("p_m");
         List<Double> doMuteProb = Arrays.asList(1-p_m, p_m);
@@ -251,8 +239,12 @@ public class GACustomization {
                     offsprings[i][j][point2] = offsprings[i][j][point1];
                 }
             }
+            double indiv_fitnes = ga.checkIndivValidTravel(offsprings[i], ga.getPatients(), ga.getDepot(), ga.getTravel_times());
+            off_fitness[i] = indiv_fitnes;
         }
-        return offsprings;
+        off_info.add(offsprings);
+        off_info.add(off_fitness);
+        return off_info;
     }
 
 

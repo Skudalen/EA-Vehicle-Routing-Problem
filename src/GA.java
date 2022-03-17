@@ -320,14 +320,15 @@ public class GA {
         return offsprings;
     }
 
-    public int[][][] mutate(int[][][] offsprings) {
+    public List<Object> mutate(int[][][] offsprings) {
+        List<Object> off_info;
         if (params.get("how_mutate") == "X") {
-            offsprings = custom_GA.mutate_BASE(offsprings);
+            off_info = custom_GA.mutate_BASE(offsprings, this);
         }
         else {
-            offsprings = custom_GA.mutate_BASE(offsprings);
+            off_info = custom_GA.mutate_BASE(offsprings, this);
         }
-        return offsprings;
+        return off_info;
     }
 
     /*
