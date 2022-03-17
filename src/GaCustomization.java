@@ -160,19 +160,14 @@ public class GACustomization {
             return offsprings_mod;
     }
 
-    public int[][][] makeOffsprings(int[][][] parents) {
-        
-        int[][][] offsprings_mod = new int[0][0][0];
-        return offsprings_mod;
-    }
 
-    public int[][][] selectSurvivors(int[][][] parents, 
+    public List<Object> selectSurvivors(int[][][] parents, 
                                     int[][][] offsprings, 
-                                    Double[][] pop_weights, 
-                                    Double[][] off_weights) {
+                                    Double[] pop_weights, 
+                                    Double[] off_weights) {
 
-        int[][][] a = new int[0][0][0];
-        return a;
+        List<Object> offspr = Arrays.asList(0);
+        return offspr;
     }
     
 

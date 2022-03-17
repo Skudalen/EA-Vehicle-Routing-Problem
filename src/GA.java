@@ -2,6 +2,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -251,30 +252,49 @@ public class GA {
     }
 
 
-    public Double[] getPopWeights(List<Object> pop_info){
-        return pop_info.get(0);
+    public double[] getPopWeights(List<Object> pop_info){
 
+        int[][][] pop = (int[][][]) pop_info.get(0);
+        List<Double> pop_fitness = Arrays.asList( (Double[]) pop_info.get(1) );
+
+        // Scale from low-best to high-best
+        double max_traveltime = Collections.max(pop_fitness);
+
+        List<Double> rev_fitness = pop_fitness.stream()
+                                                .map(x -> Math.pow((max_traveltime - x), 2) )
+                                                .collect(Collectors.toList());
+        // Normalize
+        double min_worst = Collections.min(rev_fitness);
+        double max_best = Collections.max(rev_fitness);
+        double[] weights = new double[rev_fitness.size()];
+
+        if ((max_best - min_worst) != 0) {
+            weights = rev_fitness.stream()
+                                .map(x ->  (x - min_worst)/(max_best - min_worst))
+                                .mapToDouble(x -> x)
+                                .toArray();
+        }
+        else {
+            weights = rev_fitness.stream()
+                                .mapToDouble(x -> 1.0)
+                                .toArray();
+        }
+        //double[] temp = weights;
+        //weights = Arrays.stream(weights).map(x -> x / Arrays.stream(temp).sum()).toArray();
+        return weights;
     }
 
-    /*
-    def evaluate_pop(self, pop):
-        x, fitness, weights = self.fitness(pop, self.params)   # returns x-values list, fitness list, weights list
-        return x, fitness, weights
-    */
+    
     public List<Double[]> evaluatePop(List<Object> pop) {
         
     Double[] a = new Double[this.pop_size];
         return Arrays.asList(a, a);
     }
 
-    /*
-    def do_terminate(self, pop_eval, gen_count):
-        term = True if gen_count >= self.max_gen else False
-        return term
-    */
-    public static Boolean doTerminate(Double[] doubles, int gen_count) {
+    
+    public Boolean doTerminate(double[] pop_fitness, int gen_count) {
         
-        return gen_count > 5;
+        return gen_count > this.gen_stop;
     }
 
 
@@ -350,7 +370,7 @@ public class GA {
     */
     public List<Object> makeOffsprings(int[][][] parents) {
         
-        int[][][] offsprings = custom_GA.makeOffsprings(parents);
+        List<Object> offsprings = Arrays.asList(0);
         return offsprings;
     }
     
@@ -361,15 +381,15 @@ public class GA {
         else:   # Default: generational survival selection 
             return offsprings
     */
-    public List<Object> selectSurvivors(int[][][] parents, 
+    public List<Object> selectSurvivors(int[][][] pop, 
                                     int[][][] offsprings, 
-                                    Double[] doubles, 
-                                    Double[] doubles2) {
+                                    Double[] pop_weights, 
+                                    Double[] off_weights) {
         
-        int[][][] survivors = custom_GA.selectSurvivors(parents,
+        List<Object> survivors = custom_GA.selectSurvivors(pop,
                                                         offsprings,
-                                                        doubles,
-                                                        doubles2);
+                                                        pop_weights,
+                                                        off_weights);
         return survivors;
     }
 
@@ -401,7 +421,7 @@ public class GA {
         List<Object> pop_info = initPop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         // Create var for the pop and pop_fitness
         int[][][] pop = (int[][][]) pop_info.get(0);
-        Double[] pop_fitness = (Double[]) pop_info.get(1);
+        double[] pop_fitness = (double[]) pop_info.get(1);
         // Get population weights and return {pop_weights}
         Double[] pop_weights = getPopWeights(pop_info);
         // Add the first log at gen=0 -> gen_count:{pop, pop_weights, pop_fitness}
@@ -424,7 +444,7 @@ public class GA {
             // -------UPDATING-------:
             // Updating var for the pop, pop_fitness, and pop_weights
             pop = (int[][][]) pop_info.get(0);
-            pop_fitness = (Double[]) pop_info.get(1);
+            pop_fitness = (double[]) pop_info.get(1);
             pop_weights = getPopWeights(pop_info);
             // Increment generation counter
             gen_count += 1;
