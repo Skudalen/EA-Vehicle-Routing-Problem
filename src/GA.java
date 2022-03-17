@@ -251,8 +251,8 @@ public class GA {
     }
 
 
-    public Double[] getWeightsByFitness(Double[] fitness){
-        return fitness;
+    public Double[] getPopWeights(List<Object> pop_info){
+        return pop_info.get(0);
 
     }
 
@@ -289,7 +289,7 @@ public class GA {
         parents = random.choices(pop, weights=weights, k=self.num_parents)
         return parents
     */
-    public int[][][] selectParents(int[][][] pop, List<Double[]> pop_eval) {
+    public int[][][] selectParents(int[][][] pop, Double[] pop_weights) {
         
     int[][][] a = custom_GA.selectParents(pop);
         return a;
@@ -393,26 +393,44 @@ public class GA {
 
 
     public List<List<Object>> main() {
-        List<Object> pop_info = initPop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
-        int[][][] pop = (int[][][]) pop_info.get(0);
+        // Set the generation counter to zero
         int gen_count = 0;
-        List<Double[]> pop_eval = evaluatePop(pop_info);     //pop_fitness, pop_weights
-        this.popWeights = pop_eval.get(0);   // pop_fitness
-        this.popFitness = pop_eval.get(1);   // pop_weights
-        List<List<Object>> eval_log = Arrays.asList(Arrays.asList(pop, this.popWeights, this.popFitness));
 
-        // EVOLUTION:
-        while (! doTerminate((Double[]) pop_eval.get(1), gen_count) ) {
-            int[][][] parents = selectParents(pop, pop_eval);
+         // -------INITIALIZATION-------:
+        // Initialize population and return {pop, pop_fitness}
+        List<Object> pop_info = initPop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
+        // Create var for the pop and pop_fitness
+        int[][][] pop = (int[][][]) pop_info.get(0);
+        Double[] pop_fitness = (Double[]) pop_info.get(1);
+        // Get population weights and return {pop_weights}
+        Double[] pop_weights = getPopWeights(pop_info);
+        // Add the first log at gen=0 -> gen_count:{pop, pop_weights, pop_fitness}
+        List<List<Object>> eval_log = Arrays.asList(Arrays.asList(pop, pop_fitness, pop_weights));
+
+        // -------EVOLUTION-------:
+        // Terminate on condition
+        while (! doTerminate(pop_fitness, gen_count) ) {
+            // Select parents and return {parents}
+            int[][][] parents = selectParents(pop, pop_weights);
+            // Make offsprings and return {offsprings, off_fitness}
             List<Object> offsprings_info = makeOffsprings(parents);
-            List<Double[]> off_eval = evaluatePop(offsprings_info);   //off_fitness, off_weights
-            pop_info = selectSurvivors(parents, (int[][][])offsprings_info.get(0), (Double[])pop_eval.get(1), (Double[])off_eval.get(1));
+            // Create var for the offsprings and off_fitness
+            int[][][] offprings = (int[][][]) offsprings_info.get(0);
+        //Double[] off_fitness = (Double[]) offsprings_info.get(1);
+            // Get offspring weights and return {off_weights}
+            Double[] off_weights = getPopWeights(offsprings_info);
+            pop_info = selectSurvivors(pop, offprings, pop_weights, off_weights);
+
+            // -------UPDATING-------:
+            // Updating var for the pop, pop_fitness, and pop_weights
+            pop = (int[][][]) pop_info.get(0);
+            pop_fitness = (Double[]) pop_info.get(1);
+            pop_weights = getPopWeights(pop_info);
+            // Increment generation counter
             gen_count += 1;
-            // Store data, gen > 0
-            pop_eval = evaluatePop(pop_info);
-            eval_log.add(Arrays.asList(pop, pop_eval.get(0), pop_eval.get(1)));
+            // Store data for gen > 0
+            eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights));
         }
-            
         System.out.println("Algorithm succsessfully executed");
         return eval_log;
 
