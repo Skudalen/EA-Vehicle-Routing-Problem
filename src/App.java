@@ -40,7 +40,8 @@ public class App {
         //ga_algorithm.testInitPop_BASE();
         //ga_algorithm.testInitPop_RandCut();
         //ga_algorithm.testIsValid();
-        ga_algorithm.testGetByWeights();
+        //ga_algorithm.testGetByWeights();
+        //ga_algorithm.testGetPopWeights();
         
         // ----- Main ------
         //List<List<Object>> eval_log = ga_algorithm.main();

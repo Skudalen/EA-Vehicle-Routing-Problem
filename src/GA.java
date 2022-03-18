@@ -184,12 +184,21 @@ public class GA {
     }
 
     public void testGetByWeights() {
-
         List<Double> weights = Arrays.asList(1.0, 2.0, 5.0, 7.0);
         System.out.println(weights);
-
         int test = GACustomization.getByWeight(weights);
         System.out.println(test);
+    }
+    public void testGetPopWeights() {
+        List<Object> pop_info = initPop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
+        double[] weights = getPopWeights(pop_info);
+
+        for (double e : weights) {
+            System.out.println(e);
+        }
+        System.out.println(weights.length);
+        //int test = GACustomization.getByWeight(weights);
+        //System.out.println(test);
     }
 
 
