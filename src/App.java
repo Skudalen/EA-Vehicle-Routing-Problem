@@ -20,7 +20,8 @@ public class App {
         params.put("nurse_cut", 0.2);
         params.put("worst_traveltime", 10000);
         params.put("GC_phi", 0.5);
-        params.put("theta", 30);
+        params.put("theta_base", 30);
+        params.put("theta_exp", 1.5);
         // --------------------------------------
         params.put("how_indiv", "RANDCUT");     // BASE, RANDCUT
         params.put("how_selPar", "BASE");       // BASE,
@@ -41,6 +42,7 @@ public class App {
         //ga_algorithm.testMakeIndiv_BASE();
         //ga_algorithm.testMakeIndiv_RandCut();
         //ga_algorithm.testInitPop_BASE();
+        //ga_algorithm.testInitPop_RANDCUT_easy();
         ga_algorithm.testInitPop_RANDCUT();
         //ga_algorithm.testIsValid();
         //ga_algorithm.testGetByWeights();

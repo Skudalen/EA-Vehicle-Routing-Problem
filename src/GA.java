@@ -1,30 +1,28 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class GA {
 
     private Map<String, Object> params;
     private int pop_size;
     private int gen_stop;
+    private double theta_base;
+    private double theta_exp;
     // -------------------------------
     private String instance_name;
     private Long nbr_nurses;
     private Long capacity_nurse;
-    private Double benchmark;
+    private double benchmark;
     private Map<String, Long> depot;
     private Map<String, Map<String, Long>> patients;
     private Double[][] travel_times;
     private Long num_patients;
-    private Double worst_traveltime;
+    private double worst_traveltime;
 
     // -------------------------------
     private GACustomization custom_GA;
@@ -37,6 +35,8 @@ public class GA {
         this.params = params;
         this.pop_size = (Integer) params.get("pop_size");
         this.gen_stop = (Integer) params.get("gen_stop");
+        this.theta_base = (double) params.get("theta_base");
+        this.theta_exp = (double) params.get("theta_exp");
         this.worst_traveltime = (double) (int) params.get("worst_traveltime");
         // -------------------------------
         json_reader.json_read(this, path);
@@ -154,14 +154,48 @@ public class GA {
     }
 
     public void testInitPop_RANDCUT(){
-        int[][][] pop = new int[pop_size][(int)25][(int)100];
+        int[][][] pop = new int[pop_size][][];
+        double[] pop_fitness = new double[pop_size];
 
         for (int i=0; i<pop_size; i++) {
             int[][] indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot);
             pop[i] = indiv;
+            pop_fitness[i] = checkIndivValidTravel(indiv, patients, depot, travel_times);
         }
-        for (int[][] array : pop) {
-            System.out.println(Arrays.deepToString(array));
+        for (int i=0; i<pop_size; i++) {
+            System.out.println(Arrays.deepToString(pop[i]));
+            System.out.println("SCORE: ");
+            System.out.println(pop_fitness[i]);
+        }
+    }
+
+    public void testInitPop_RANDCUT_easy(){
+        int[][][] pop = {
+            {
+                {1, 2, 3, 4, 5, 6, 7, 8, 9},
+                {10, 11, 12, 13, 14, 15},
+                {},
+                {},
+                {}
+            },
+            {
+                {9, 8, 7, 6},
+                {5, 4},
+                {3, 2, 1},
+                {},
+                {}
+            }
+        };
+        double[] pop_fitness = new double[pop.length];
+
+        for (int i=0; i<pop.length; i++) {
+            int[][] indiv = pop[i];
+            pop_fitness[i] = checkIndivValidTravel(indiv, patients, depot, travel_times);
+        }
+        for (int i=0; i<pop.length; i++) {
+            System.out.println(Arrays.deepToString(pop[i]));
+            System.out.println("SCORE: ");
+            System.out.println(pop_fitness[i]);
         }
     }
 
@@ -325,10 +359,11 @@ public class GA {
     // ------------------------- MAIN METHODS -----------------------------
 
 
-    // IMPORTANT
+    // IMPORTANT: Fitness / Travel_time
     public double checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
         double rt = (double) depot.get("return_time");
-        double theta = (double) depot.get("theta");
+        double theta_base = (double) (int)params.get("theta_base");
+        double theta_exp = (double) (int)params.get("theta_exp");
         double penalties = 0;
         double tt_total = 0.0;
 
@@ -356,19 +391,19 @@ public class GA {
                 double care_time = (double) patients.get(patient_str).get("care_time");
                 time += care_time;
                 // Not valid if the nurse finishes after end_time
-                if (time > end_time) return penalties += 1;
+                if (time > end_time) penalties += 1;
                 // -----
                 // Valid and patient travel_time is added
             }
             // Not valid if nurse is not back within the return_time
-            if (time > rt) return penalties += 1;
+            if (time > rt) penalties += 1;
             // -----
             // Valid and nurse travel_time is added
             tt_total += travel_time;
         }
         // Add penalty to travel_time (tt_total + theta * penalties)
-        tt_total += (theta * penalties);
-        
+        tt_total += (theta_base * Math.pow(penalties, theta_exp));
+
         return tt_total;
     }
 

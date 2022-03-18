@@ -213,7 +213,7 @@ public class GACustomization {
             if (i == (num_nurses-1) && patient_ints.size() > 0){
                 int patients_left = patient_ints.size();
                 for (int k=0; k<patients_left; k++) {
-                    nurse_list.add(patient_ints.remove(k));
+                    nurse_list.add(patient_ints.remove(0));
                 }
             }
             // Remove unnecessary zeroes
@@ -278,7 +278,7 @@ public class GACustomization {
             if (i == (num_nurses-1) && patient_ints.size() > 0){
                 int patients_left = patient_ints.size();
                 for (int k=0; k<patients_left; k++) {
-                    nurse_list.add(patient_ints.remove(k));
+                    nurse_list.add(patient_ints.remove(0));
                 }
             }
             // Remove unnecessary zeroes
@@ -290,7 +290,7 @@ public class GACustomization {
             }
             //System.out.println(Arrays.deepToString(indiv));
         }
-        System.out.println(patient_ints);
+        //System.out.println(patient_ints);
         return indiv;
     }
 
