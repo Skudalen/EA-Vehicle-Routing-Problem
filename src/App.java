@@ -42,6 +42,8 @@ public class App {
         //ga_algorithm.testIsValid();
         //ga_algorithm.testGetByWeights();
         //ga_algorithm.testGetPopWeights();
+        //ga_algorithm.testCross();
+        ga_algorithm.testCross();
         
         // ----- Main ------
         //List<List<Object>> eval_log = ga_algorithm.main();
