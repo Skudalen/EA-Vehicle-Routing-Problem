@@ -201,6 +201,71 @@ public class GA {
         //System.out.println(test);
     }
 
+    public void testCross(){
+        int[][][] pop = {
+            {
+                {1, 2, 3, 4, 5},
+                {6, 7, 8},
+                {},
+                {}
+            },
+            {
+                {9, 8, 7, 6},
+                {5, 4},
+                {3, 2, 1},
+                {},
+                {}
+            }
+        };
+        for (int[][] array : pop) {
+            System.out.println(Arrays.deepToString(array));
+        }
+        System.out.println("\n");
+
+        pop = custom_GA.doCrossover_BASE(pop);
+        for (int[][] array : pop) {
+            System.out.println(Arrays.deepToString(array));
+        }
+    }
+    public void testMutate(){
+        int[][][] pop = {
+            {
+                {1, 2, 3, 4, 5, 6, 7, 8, 9},
+                {10, 11, 12, 13, 14},
+                {},
+                {}
+            },
+            {
+                {9, 8, 7, 6},
+                {5, 4},
+                {3, 2, 1},
+                {},
+                {}
+            }
+        };
+        for (int[][] array : pop) {
+            System.out.println(Arrays.deepToString(array));
+        }
+        System.out.println("\n");
+
+        pop = (int[][][]) custom_GA.mutate_BASE(pop, this).get(0);
+        for (int[][] array : pop) {
+            System.out.println(Arrays.deepToString(array));
+        }
+    }
+
+    public void testSelSurv(){
+        int[][][] pop = new int[pop_size][][];
+        int[][][] offsprings = new int[pop_size][][];
+
+        for (int[][] array : pop) {
+            System.out.println(Arrays.deepToString(array));
+        }
+        for (int[][] array : offsprings){
+            System.out.println(Arrays.deepToString(array));
+        }
+    }
+
 
     // ------------------------- MAIN METHODS -----------------------------
 

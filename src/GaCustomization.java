@@ -54,6 +54,121 @@ public class GACustomization {
         }
         return diff;    
     }
+    static private boolean isDuplicates(int [] offspring, int index){
+        for(int i = 0; i < offspring.length; i++){
+            if((offspring[i] == offspring[index]) &&
+                    (index != i) ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static public List<int[]> PMX(Map<String, Object> params, int[] nurse1, int[] nurse2) {
+        // Retrive the prob for crossover 
+        double p_c = (double) params.get("p_c");
+        List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
+
+        // Determine the longest and shortest
+        int[] shortest = nurse1; 
+        int[] longest = nurse2; 
+        if (nurse2.length < nurse1.length) {
+            shortest = nurse2;
+            longest = nurse1;
+        }
+        // Get two crossover points
+        int point1 = -1;
+        int point2 = -1;
+        int point_counter = 0;
+        for (int k=0; k<shortest.length; k++) {
+            int temp = getByWeight(doCrossProb);
+            if (temp == 1) {
+                if (point_counter == 0) {
+                    point1 = k;
+                    point_counter += 1;
+                }
+                else if (point_counter == 1) {
+                    point2 = k;
+                    point_counter += 1;
+                }
+                else break;
+            }
+        }
+        // Finish if one crossoverpoint was not found
+        if (point1 == -1 || point2 == -1) return Arrays.asList(nurse1, nurse2);
+
+        // -------- DO CROSSOVER ---------
+        // Init offsprings
+        int[] offspring1 = new int[nurse1.length];
+        int[] offspring2 = new int[nurse2.length];
+        
+        // Create the segments
+        int segment_length = (point2 - point1) + 1;
+        int[] segment1 = new int[segment_length];
+        int[] segment2 = new int[segment_length];
+        int segmentIndex = 0;
+        for(int i = 0; i<shortest.length; i++){
+            if((i >= point1) && (i <= point2)){
+                segment1[segmentIndex] = nurse1[i];
+                segment2[segmentIndex] = nurse2[i];
+                segmentIndex++;
+            }
+        }
+        // Insert sements 
+        // Off1 gets Seg2 and Off2 gets Seg1
+        segmentIndex = 0;
+        for(int j = 0; j<shortest.length; j++){
+           if((j >= point1) && (j <= point2)){
+               offspring1[j] = segment2[segmentIndex];
+               offspring2[j] = segment1[segmentIndex];
+               segmentIndex++;
+           }
+        }
+        // Fill Off1 from Nurse1
+        for(int i = 0; i < offspring1.length; i++){
+            if((i < point1) || (i > point2)){
+               offspring1[i] = nurse1[i];
+            }
+        }
+        // Fill Off2 from Nurse2
+        for(int index = 0; index < offspring2.length; index++){
+            if((index < point1) || (index > point2)){
+               offspring2[index] = nurse2[index];
+            }
+        }
+        // Deal with duplicates Off1
+        for(int i = 0; i < offspring1.length; i++){
+            if((i < point1) || (i > point2)){
+                while(isDuplicates(offspring1, i)){
+                    for(int j = 0; j < segment1.length; j++){
+                        if(segment1[j] == offspring1[i]){
+                            offspring1[i] = segment2[j];
+                        }
+                        else if(segment2[j] == offspring1[i]){
+                            offspring1[i] = segment1[j];
+                        }
+                    }
+                }
+            }
+        }
+        // Deal with duplicates Off2
+        for(int i = 0; i < offspring2.length; i++){
+            if((i < point1) || (i > point2)){
+                while(isDuplicates(offspring2, i)){
+                    for(int j = 0; j < segment1.length; j++){
+                        if(segment1[j] == offspring2[i]){
+                            offspring2[i] = segment2[j];
+                        }
+                        else if(segment2[j] == offspring2[i]){
+                            offspring2[i] = segment1[j];
+                        }
+                    }
+                }
+            }
+        }
+        
+        return Arrays.asList(offspring1, offspring2);
+    }
 
 
     // ----------------------------- CustomGA Methods -------------------------------
@@ -178,7 +293,7 @@ public class GACustomization {
     }
 
     // One-point Crossover
-    public int[][][] doCrossover_BASE(int[][][] pop) {
+    public int[][][] doCrossover_OLD(int[][][] pop) {
         // Retrive the prob for crossover 
         double p_c = (double) params.get("p_c");
         List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
@@ -228,6 +343,30 @@ public class GACustomization {
         }
         return pop;
     }
+    // PMX Crossover
+    public int[][][] doCrossover_BASE(int[][][] pop) {
+        
+        // Iterate each individual
+        for (int i=0; i<pop.length-1; i+=2) {
+            // Choose two parents 
+            int[][] parent1 = pop[i];
+            int[][] parent2 = pop[i+1];
+            // Iterate each nurse pair 
+            for (int j=0; j<parent1.length; j++) {
+                // Choose a nurse pair 
+                int[] nurse1 = parent1[j];
+                int[] nurse2 = parent2[j];
+                // Break if one nurse has no patients
+                if (nurse1.length < 1 || nurse2.length < 1) break;
+                
+                // DO CROSSOVER
+                List<int[]> offsprings = PMX(params, nurse1, nurse2);
+                pop[i][j] = offsprings.get(0);
+                pop[i+1][j] = offsprings.get(1);
+            }
+        }
+        return pop;
+    }
 
     // Swap Mutation
     public List<Object> mutate_BASE(int[][][] offsprings, GA ga) {
@@ -251,8 +390,14 @@ public class GACustomization {
                     // Determine if this index k is the mutation point
                     int temp = getByWeight(doMuteProb);
                     if (temp == 1) {
-                        if (point_counter == 0) point1 = k;
-                        else if (point_counter == 1) point2 = k;
+                        if (point_counter == 0) {
+                            point1 = k;
+                            point_counter += 1;
+                        }
+                        else if (point_counter == 1) {
+                            point2 = k;
+                            point_counter += 1;
+                        }
                         else break;
                     }
                 }
