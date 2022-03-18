@@ -8,6 +8,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.math3.analysis.function.Logit;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
 
@@ -22,7 +23,7 @@ public class GACustomization {
 
      // ----------------------------- Help Methods -------------------------------
 
-    public int getByWeight(List<Double> weights) {
+    static public int getByWeight(List<Double> weights) {
         List<Pair<Integer, Double>> itemWeights = new ArrayList<Pair<Integer, Double>>();
         for (int i=0; i < weights.size(); i++) {
             itemWeights.add(new Pair<Integer,Double>(i, weights.get(i)));
@@ -31,7 +32,7 @@ public class GACustomization {
         return selected_int;
     }
 
-    public double getIndivDiff(int[][] indiv1, int[][] indiv2) {
+    static public double getIndivDiff(int[][] indiv1, int[][] indiv2) {
         double diff = 0;
         int[] shortest;
         int[] longest;
@@ -270,18 +271,94 @@ public class GACustomization {
     }
 
     // Genaralized Crowding
-    public List<Object> selectSurvivors_BASE(int[][][] parents, int[][][] offsprings, 
-                                    double[] pop_weights, double[] off_weights) {
-        
-                                        // Get phi to GC
+    public List<Object> selectSurvivors_BASE(int[][][] pop, int[][][] offsprings, 
+                                            List<Object> pop_info, List<Object> off_info) {
+        List<Object> newPop_info = new ArrayList<>();
+        // Get phi to GC
         double phi = (double) params.get("GC_phi");
-        
+        // Init new pop and pop_fitness
+        int[][][] newPop = new int[pop.length][][];
+        double[] newFitness = new double[pop.length];
+        // get fitness and weights
+        double[] pop_fitness = (double[]) pop_info.get(0);
+        double[] pop_weights = (double[]) pop_info.get(1);
+        double[] off_fitness = (double[]) off_info.get(0);
+        double[] off_weights = (double[]) off_info.get(1);
 
-
-        
-
-        List<Object> offspr = Arrays.asList(0);
-        return offspr;
+        for (int i=0; i<pop.length; i+=2) {
+            int[][] p1 = pop[i];
+            int[][] p2 = pop[i+1];
+            int[][] o1 = offsprings[i];
+            int[][] o2 = offsprings[i+1];
+            double p1_w = pop_weights[i];
+            double p2_w = pop_weights[i+1];
+            double o1_w = off_weights[i];
+            double o2_w = off_weights[i+1];
+            Logit logit = new Logit();
+            if (getIndivDiff(p1, o1) + getIndivDiff(p2, o2) < getIndivDiff(p1, o2) + getIndivDiff(p2, o1)) {
+                // p1 vs. o1
+                double logit_po = Math.pow(phi, logit.value(p1_w-o1_w));
+                double logit_op = Math.pow(phi, logit.value(o1_w-p1_w));
+                double p_o = (logit_po * o1_w) / (logit_po * o1_w + logit_op * p1_w);
+                List<Double> chooseOffProb = Arrays.asList(1-p_o, p_o);
+                int temp = getByWeight(chooseOffProb);
+                if (temp == 0) {
+                    newPop[i] = p1;
+                    newFitness[i] = pop_fitness[i];
+                }
+                else {
+                    newPop[i] = o1;
+                    newFitness[i] = off_fitness[i];
+                }
+                // p2 vs. o2
+                logit_po = Math.pow(phi, logit.value(p2_w-o2_w));
+                logit_op = Math.pow(phi, logit.value(o2_w-p2_w));
+                p_o = (logit_po * o2_w) / (logit_po * o2_w + logit_op * p2_w);
+                chooseOffProb = Arrays.asList(1-p_o, p_o);
+                temp = getByWeight(chooseOffProb);
+                if (temp == 0) {
+                    newPop[i+1] = p2;
+                    newFitness[i+1] = pop_fitness[i+1];
+                }
+                else {
+                    newPop[i+1] = o2;
+                    newFitness[i+1] = off_fitness[i+1];
+                }
+            }
+            else {
+                // p1 vs. o2
+                double logit_po = Math.pow(phi, logit.value(p1_w-o2_w));
+                double logit_op = Math.pow(phi, logit.value(o2_w-p1_w));
+                double p_o = (logit_po * o2_w) / (logit_po * o2_w + logit_op * p1_w);
+                List<Double> chooseOffProb = Arrays.asList(1-p_o, p_o);
+                int temp = getByWeight(chooseOffProb);
+                if (temp == 0) {
+                    newPop[i] = p1;
+                    newFitness[i] = pop_fitness[i];
+                }
+                else {
+                    newPop[i] = o2;
+                    newFitness[i] = off_fitness[i+1];
+                }
+                // p2 vs. o1
+                logit_po = Math.pow(phi, logit.value(p2_w-o1_w));
+                logit_op = Math.pow(phi, logit.value(o1_w-p2_w));
+                p_o = (logit_po * o1_w) / (logit_po * o1_w + logit_op * p2_w);
+                chooseOffProb = Arrays.asList(1-p_o, p_o);
+                temp = getByWeight(chooseOffProb);
+                if (temp == 0) {
+                    newPop[i+1] = p2;
+                    newFitness[i+1] = pop_fitness[i+1];
+                }
+                else {
+                    newPop[i+1] = o1;
+                    newFitness[i+1] = off_fitness[i];
+                }
+            }
+        }
+        newPop_info.add(newPop);
+        newPop_info.add(newFitness);
+        return newPop_info;
     }
     
 
