@@ -68,14 +68,9 @@ public class GACustomization {
         // Retrive the prob for crossover 
         double p_c = (double) params.get("p_c");
         List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
-
         // Determine the longest and shortest
         int[] shortest = nurse1; 
-        int[] longest = nurse2; 
-        if (nurse2.length < nurse1.length) {
-            shortest = nurse2;
-            longest = nurse1;
-        }
+        if (nurse2.length < nurse1.length) shortest = nurse2;
         // Get two crossover points
         int point1 = -1;
         int point2 = -1;
@@ -101,7 +96,6 @@ public class GACustomization {
         // Init offsprings
         int[] offspring1 = new int[nurse1.length];
         int[] offspring2 = new int[nurse2.length];
-        
         // Create the segments
         int segment_length = (point2 - point1) + 1;
         int[] segment1 = new int[segment_length];
@@ -215,6 +209,14 @@ public class GACustomization {
                     break;
                 }
             }
+            // Add remaining patients if more left
+            if (i == (num_nurses-1) && patient_ints.size() > 0){
+                int patients_left = patient_ints.size();
+                for (int k=0; k<patients_left; k++) {
+                    nurse_list.add(patient_ints.remove(k));
+                }
+            }
+            // Remove unnecessary zeroes
             if (nurse_list.size()>0) {
                 indiv[i] = nurse_list.stream().filter(x -> x != 0.0).mapToInt(x -> x).toArray();
             }
@@ -272,6 +274,14 @@ public class GACustomization {
                     break;
                 }
             }
+            // Add remaining patients if more left
+            if (i == (num_nurses-1) && patient_ints.size() > 0){
+                int patients_left = patient_ints.size();
+                for (int k=0; k<patients_left; k++) {
+                    nurse_list.add(patient_ints.remove(k));
+                }
+            }
+            // Remove unnecessary zeroes
             if (nurse_list.size()>0) {
                 indiv[i] = nurse_list.stream().filter(x -> x != 0.0).mapToInt(x -> x).toArray();
             }
@@ -280,6 +290,7 @@ public class GACustomization {
             }
             //System.out.println(Arrays.deepToString(indiv));
         }
+        System.out.println(patient_ints);
         return indiv;
     }
 

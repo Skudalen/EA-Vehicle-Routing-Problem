@@ -2,6 +2,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math3.analysis.function.Logit;
+
 public class App {
 
     public static void setup() {
@@ -18,6 +20,7 @@ public class App {
         params.put("nurse_cut", 0.2);
         params.put("worst_traveltime", 10000);
         params.put("GC_phi", 0.5);
+        params.put("theta", 30);
         // --------------------------------------
         params.put("how_indiv", "RANDCUT");     // BASE, RANDCUT
         params.put("how_selPar", "BASE");       // BASE,
@@ -38,13 +41,20 @@ public class App {
         //ga_algorithm.testMakeIndiv_BASE();
         //ga_algorithm.testMakeIndiv_RandCut();
         //ga_algorithm.testInitPop_BASE();
-        //ga_algorithm.testInitPop_RandCut();
+        ga_algorithm.testInitPop_RANDCUT();
         //ga_algorithm.testIsValid();
         //ga_algorithm.testGetByWeights();
         //ga_algorithm.testGetPopWeights();
         //ga_algorithm.testCross();
-        ga_algorithm.testMutate();
+        //ga_algorithm.testMutate();
+        //ga_algorithm.testSelSurv();
         
+        /*
+        Logit logit = new Logit();
+        double d = logit.value(0);
+        System.out.print(d);
+        */
+
         // ----- Main ------
         //List<List<Object>> eval_log = ga_algorithm.main();
         //System.out.println(eval_log.get(10));

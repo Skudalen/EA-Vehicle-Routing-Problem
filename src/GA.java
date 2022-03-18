@@ -243,8 +243,8 @@ public class GA {
                 {}
             }
         };
-        for (int[][] array : pop) {
-            System.out.println(Arrays.deepToString(array));
+        for (int i=0; i<pop.length; i++) {
+            System.out.println(Arrays.deepToString(pop[i]));
         }
         System.out.println("\n");
 
@@ -255,15 +255,70 @@ public class GA {
     }
 
     public void testSelSurv(){
-        int[][][] pop = new int[pop_size][][];
-        int[][][] offsprings = new int[pop_size][][];
+        int[][][] pop = {
+            {
+                {1, 2, 3, 4, 5, 6, 7, 8, 9},
+                {10, 11, 12, 13, 14, 15},
+                {},
+                {},
+                {}
+            },
+            {
+                {9, 8, 7, 6},
+                {5, 4},
+                {3, 2, 1},
+                {},
+                {}
+            }
+        };
+        int[][][] offsprings = {
+            {
+                {9, 8, 7, 6, 5, 4, 3, 2, 1},
+                {15, 14, 13, 12, 11},
+                {10},
+                {},
+                {}
+            },
+            {
+                {6, 7, 6, 5},
+                {4, 5},
+                {1, 2, 3},
+                {},
+                {},
+                {}
+            }
+        };
+        // Set up and print pop info
+        double[] pop_fitness = new double[offsprings.length];
+        for (int i=0; i<pop.length; i++) {
+            System.out.println(Arrays.deepToString(pop[i]));
+            pop_fitness[i] = checkIndivValidTravel(pop[i], this.patients, this.depot, this.travel_times);
+        }
+        double[] pop_weights = getPopWeights(Arrays.asList(pop, pop_fitness));
+        System.out.println(pop_fitness);
+        System.out.println(pop_weights);
 
-        for (int[][] array : pop) {
-            System.out.println(Arrays.deepToString(array));
+        System.out.println("\n");
+
+        // Set up and print off info
+        double[] off_fitness = new double[offsprings.length];
+        for (int i=0; i<offsprings.length; i++){
+            System.out.println(Arrays.deepToString(offsprings[i]));
+            off_fitness[i] = checkIndivValidTravel(offsprings[i], this.patients, this.depot, this.travel_times);
         }
-        for (int[][] array : offsprings){
-            System.out.println(Arrays.deepToString(array));
+        double[] off_weights = getPopWeights(Arrays.asList(offsprings, off_fitness));
+        System.out.println(off_fitness);
+        System.out.println(off_weights);
+
+        System.out.println("\n");
+
+        // Calc and print new pop
+        List<Object> pop_info = selectSurvivors(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
+        int[][][] newPop = (int[][][]) pop_info.get(0);
+        for (int i=0; i<pop.length; i++) {
+            System.out.println(Arrays.deepToString(newPop[i]));
         }
+        System.out.println(pop_info.get(1));
     }
 
 
@@ -272,8 +327,10 @@ public class GA {
 
     // IMPORTANT
     public double checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
-        Double rt = (double) depot.get("return_time");
-        Double tt_total = 0.0;
+        double rt = (double) depot.get("return_time");
+        double theta = (double) depot.get("theta");
+        double penalties = 0;
+        double tt_total = 0.0;
 
         for (int[] nurse : indiv) { 
             double time = 0;
@@ -291,21 +348,27 @@ public class GA {
                 double wait_time = (start_time - time);
                 if (start_time > time) time += wait_time;
                 // Not valid if the nurse arrives after end_time
-                if (time > end_time) return this.worst_traveltime;
+                if (time > end_time) {
+                    penalties += 1;
+                    break;
+                }
                 // Add care_time
                 double care_time = (double) patients.get(patient_str).get("care_time");
                 time += care_time;
                 // Not valid if the nurse finishes after end_time
-                if (time > end_time) return this.worst_traveltime;
+                if (time > end_time) return penalties += 1;
                 // -----
                 // Valid and patient travel_time is added
             }
             // Not valid if nurse is not back within the return_time
-            if (time > rt) return this.worst_traveltime;
+            if (time > rt) return penalties += 1;
             // -----
             // Valid and nurse travel_time is added
             tt_total += travel_time;
         }
+        // Add penalty to travel_time (tt_total + theta * penalties)
+        tt_total += (theta * penalties);
+        
         return tt_total;
     }
 
@@ -473,6 +536,7 @@ public class GA {
             double[] off_fitness = (double[]) offsprings_info.get(1);
             // Get offspring weights and return {off_weights}
             double[] off_weights = getPopWeights(offsprings_info);
+            // Update population and return {pop, pop_fitness}
             pop_info = selectSurvivors(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
 
             // -------UPDATING-------:
