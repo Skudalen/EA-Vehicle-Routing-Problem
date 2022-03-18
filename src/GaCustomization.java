@@ -25,7 +25,7 @@ public class GACustomization {
 
     static public int getByWeight(List<Double> weights) {
         List<Pair<Integer, Double>> itemWeights = new ArrayList<Pair<Integer, Double>>();
-        for (int i=0; i < weights.size(); i++) {
+        for (int i=0; i<weights.size(); i++) {
             itemWeights.add(new Pair<Integer,Double>(i, weights.get(i)));
         }
         int selected_int = new EnumeratedDistribution<>(itemWeights).sample();
@@ -271,19 +271,15 @@ public class GACustomization {
     }
 
     // Genaralized Crowding
-    public List<Object> selectSurvivors_BASE(int[][][] pop, int[][][] offsprings, 
-                                            List<Object> pop_info, List<Object> off_info) {
+    public List<Object> selectSurvivors_BASE(int[][][] pop, double[] pop_fitness, 
+                                            double[] pop_weights, int[][][] offsprings, 
+                                            double[] off_fitness,  double[] off_weights) {
         List<Object> newPop_info = new ArrayList<>();
         // Get phi to GC
         double phi = (double) params.get("GC_phi");
         // Init new pop and pop_fitness
         int[][][] newPop = new int[pop.length][][];
         double[] newFitness = new double[pop.length];
-        // get fitness and weights
-        double[] pop_fitness = (double[]) pop_info.get(0);
-        double[] pop_weights = (double[]) pop_info.get(1);
-        double[] off_fitness = (double[]) off_info.get(0);
-        double[] off_weights = (double[]) off_info.get(1);
 
         for (int i=0; i<pop.length; i+=2) {
             int[][] p1 = pop[i];

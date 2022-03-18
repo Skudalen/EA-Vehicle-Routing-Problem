@@ -19,12 +19,12 @@ public class App {
         params.put("worst_traveltime", 10000);
         params.put("GC_phi", 0.5);
         // --------------------------------------
-        params.put("how_indiv", "RandCut");
-        params.put("how_selPar", "RandCut");
-        params.put("how_doCross", "RandCut");
-        params.put("how_mutate", "RandCut");
-        params.put("how_makeOff", "RandCut");
-        params.put("how_selSurv", "RandCut");
+        params.put("how_indiv", "RANDCUT");     // BASE, RANDCUT
+        params.put("how_selPar", "BASE");       // BASE,
+        params.put("how_doCross", "BASE");      // BASE,
+        params.put("how_mutate", "BASE");       // BASE,
+        params.put("how_makeOff", "BASE");      // BASE,
+        params.put("how_selSurv", "BASE");      // BASE,
         
         // ----- Setup algorithm -----
         String train_path = System.getProperty("user.dir") + "/src/train/train_0.json/";
@@ -40,9 +40,10 @@ public class App {
         //ga_algorithm.testInitPop_BASE();
         //ga_algorithm.testInitPop_RandCut();
         //ga_algorithm.testIsValid();
+        ga_algorithm.testGetByWeights();
         
         // ----- Main ------
-        //Map<Integer, List<Object>> eval_log = ga_algorithm.main();
+        //List<List<Object>> eval_log = ga_algorithm.main();
         //System.out.println(eval_log.get(10));
     }
 }

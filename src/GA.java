@@ -34,6 +34,7 @@ public class GA {
     
     // CONSTRUCTOR. Set all params and read json
     public GA (Map<String, Object> params, JSONReader json_reader, GACustomization custom, String path) {
+        this.params = params;
         this.pop_size = (Integer) params.get("pop_size");
         this.gen_stop = (Integer) params.get("gen_stop");
         this.worst_traveltime = (double) (int) params.get("worst_traveltime");
@@ -182,6 +183,15 @@ public class GA {
         System.out.println(Arrays.deepToString(valid_indivs));
     }
 
+    public void testGetByWeights() {
+
+        List<Double> weights = Arrays.asList(1.0, 2.0, 5.0, 7.0);
+        System.out.println(weights);
+
+        int test = GACustomization.getByWeight(weights);
+        System.out.println(test);
+    }
+
 
     // ------------------------- MAIN METHODS -----------------------------
 
@@ -229,11 +239,11 @@ public class GA {
     public List<Object> initPop(int pop_size, long nbr_nurses, long num_patients, long capacity_nurse, 
                                 Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
         int[][][] pop = new int[pop_size][(int)nbr_nurses][(int)num_patients];
-        Double[] popFitness = new Double[pop_size];
+        double[] popFitness = new double[pop_size];
 
         for (int i=0; i<pop_size; i++) {
             int[][] indiv;
-            if (params.get("how_indiv") == "RANDCUT") {
+            if ((String)params.get("how_indiv") == "RANDCUT") {
                 indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot);
             }
             else {
@@ -248,7 +258,7 @@ public class GA {
 
     public double[] getPopWeights(List<Object> pop_info){
         //int[][][] pop = (int[][][]) pop_info.get(0);
-        List<Double> pop_fitness = Arrays.asList( (Double[]) pop_info.get(1) );
+        List<Double> pop_fitness = Arrays.stream((double[]) pop_info.get(1)).boxed().collect(Collectors.toList());
 
         // Scale from low-best to high-best
         double max_traveltime = Collections.max(pop_fitness);
@@ -330,14 +340,15 @@ public class GA {
         return off_info;
     }
     
-    public List<Object> selectSurvivors(int[][][] pop, int[][][] offsprings, 
-                                    double[] pop_weights, double[] off_weights) {
+    public List<Object> selectSurvivors(int[][][] pop, double[] pop_fitness, 
+                                        double[] pop_weights, int[][][] offsprings, 
+                                        double[] off_fitness,  double[] off_weights) {
         List<Object> pop_info;
         if (params.get("how_selSurv") == "X") {
-            pop_info = custom_GA.selectSurvivors_BASE(pop, offsprings, pop_weights, off_weights);
+            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
         }
         else {
-            pop_info = custom_GA.selectSurvivors_BASE(pop, offsprings, pop_weights, off_weights);
+            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
         }
         return pop_info;
     }
@@ -384,10 +395,11 @@ public class GA {
             // Make offsprings and return {offsprings, off_fitness}
             List<Object> offsprings_info = makeOffsprings(parents);
             // Create var for the offsprings and off_fitness
-            int[][][] offprings = (int[][][]) offsprings_info.get(0);
+            int[][][] offsprings = (int[][][]) offsprings_info.get(0);
+            double[] off_fitness = (double[]) offsprings_info.get(1);
             // Get offspring weights and return {off_weights}
             double[] off_weights = getPopWeights(offsprings_info);
-            pop_info = selectSurvivors(pop, offprings, pop_weights, off_weights);
+            pop_info = selectSurvivors(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
 
             // -------UPDATING-------:
             // Updating var for the pop, pop_fitness, and pop_weights
