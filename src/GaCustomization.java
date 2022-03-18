@@ -403,8 +403,10 @@ public class GACustomization {
                 }
                 // Set mutation
                 if (point1 != -1 && point2 != -1) {
-                    offsprings[i][j][point1] = offsprings[i][j][point2];
-                    offsprings[i][j][point2] = offsprings[i][j][point1];
+                    int val1 = offsprings[i][j][point1];
+                    int val2 = offsprings[i][j][point2];
+                    offsprings[i][j][point1] = val2;
+                    offsprings[i][j][point2] = val1;
                 }
             }
             double indiv_fitnes = ga.checkIndivValidTravel(offsprings[i], ga.getPatients(), ga.getDepot(), ga.getTravel_times());

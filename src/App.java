@@ -12,7 +12,7 @@ public class App {
         // ----- Setting parameters -----
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("pop_size", 10);
-        params.put("p_m", 0.1);
+        params.put("p_m", 0.5);
         params.put("p_c", 0.6);
         params.put("gen_stop", 10);
         params.put("nurse_cut", 0.2);
@@ -43,7 +43,7 @@ public class App {
         //ga_algorithm.testGetByWeights();
         //ga_algorithm.testGetPopWeights();
         //ga_algorithm.testCross();
-        ga_algorithm.testCross();
+        ga_algorithm.testMutate();
         
         // ----- Main ------
         //List<List<Object>> eval_log = ga_algorithm.main();
