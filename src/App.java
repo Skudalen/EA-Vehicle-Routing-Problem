@@ -43,13 +43,13 @@ public class App {
         //ga_algorithm.testMakeIndiv_RandCut();
         //ga_algorithm.testInitPop_BASE();
         //ga_algorithm.testInitPop_RANDCUT_easy();
-        ga_algorithm.testInitPop_RANDCUT();
+        //ga_algorithm.testInitPop_RANDCUT();
         //ga_algorithm.testIsValid();
         //ga_algorithm.testGetByWeights();
         //ga_algorithm.testGetPopWeights();
         //ga_algorithm.testCross();
         //ga_algorithm.testMutate();
-        //ga_algorithm.testSelSurv();
+        ga_algorithm.testSelSurv();
         
         /*
         Logit logit = new Logit();

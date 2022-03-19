@@ -35,7 +35,7 @@ public class GA {
         this.params = params;
         this.pop_size = (Integer) params.get("pop_size");
         this.gen_stop = (Integer) params.get("gen_stop");
-        this.theta_base = (double) params.get("theta_base");
+        this.theta_base = (double) (int) params.get("theta_base");
         this.theta_exp = (double) params.get("theta_exp");
         this.worst_traveltime = (double) (int) params.get("worst_traveltime");
         // -------------------------------
@@ -329,8 +329,8 @@ public class GA {
             pop_fitness[i] = checkIndivValidTravel(pop[i], this.patients, this.depot, this.travel_times);
         }
         double[] pop_weights = getPopWeights(Arrays.asList(pop, pop_fitness));
-        System.out.println(pop_fitness);
-        System.out.println(pop_weights);
+        System.out.println(Arrays.toString(pop_fitness));
+        System.out.println(Arrays.toString(pop_weights));
 
         System.out.println("\n");
 
@@ -341,8 +341,8 @@ public class GA {
             off_fitness[i] = checkIndivValidTravel(offsprings[i], this.patients, this.depot, this.travel_times);
         }
         double[] off_weights = getPopWeights(Arrays.asList(offsprings, off_fitness));
-        System.out.println(off_fitness);
-        System.out.println(off_weights);
+        System.out.println(Arrays.toString(off_fitness)); 
+        System.out.println(Arrays.toString(off_weights));
 
         System.out.println("\n");
 
@@ -363,7 +363,7 @@ public class GA {
     public double checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
         double rt = (double) depot.get("return_time");
         double theta_base = (double) (int)params.get("theta_base");
-        double theta_exp = (double) (int)params.get("theta_exp");
+        double theta_exp = (double) params.get("theta_exp");
         double penalties = 0;
         double tt_total = 0.0;
 
@@ -433,15 +433,17 @@ public class GA {
         List<Double> pop_fitness = Arrays.stream((double[]) pop_info.get(1)).boxed().collect(Collectors.toList());
 
         // Scale from low-best to high-best
-        double max_traveltime = Collections.max(pop_fitness);
+        double max_traveltime = Collections.max(pop_fitness) * 1.1;
 
-        List<Double> rev_fitness = pop_fitness.stream()
-                                                .map(x -> Math.pow((max_traveltime - x), 2) )
-                                                .collect(Collectors.toList());
-        // Normalize
+        double[] weights = pop_fitness.stream()
+                                    //.map(x -> Math.pow((max_traveltime - x), 1.2) )
+                                    .map(x -> (max_traveltime - x))
+                                    .mapToDouble(x -> x)
+                                    .toArray();
+        // Min, Max normalization 
+        /*
         double min_worst = Collections.min(rev_fitness);
         double max_best = Collections.max(rev_fitness);
-        double[] weights = new double[rev_fitness.size()];
 
         if ((max_best - min_worst) != 0) {
             weights = rev_fitness.stream()
@@ -454,8 +456,9 @@ public class GA {
                                 .mapToDouble(x -> 1.0)
                                 .toArray();
         }
-        //double[] temp = weights;
-        //weights = Arrays.stream(weights).map(x -> x / Arrays.stream(temp).sum()).toArray();
+        */
+        double weight_sum = Arrays.stream(weights).sum();
+        weights = Arrays.stream(weights).map(x -> x / weight_sum).toArray();
         return weights;
     }
 
