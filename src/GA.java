@@ -88,7 +88,9 @@ public class GA {
     public void setInstance_name(String instance_name) {
         this.instance_name = instance_name;
     }
-
+    public double getGCPhi() {
+        return GC_phi;
+    }
     // ------------------------- TESTING METHODS -----------------------------
 
     public void testJsonParser() {
@@ -327,10 +329,11 @@ public class GA {
 
 
     // IMPORTANT: Fitness / Travel_time
-    public List<Object> checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
+    public List<Object> checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, 
+                                                Map<String, Long> depot, Double[][] travel_times) {
         double rt = (double) depot.get("return_time");
-        double theta_base = (double) (int)params.get("theta_base");
-        double theta_exp = (double) params.get("theta_exp");
+        double theta_base = this.theta_base;
+        double theta_exp = this.theta_exp;
         double penalties = 0;
         double tt_total = 0.0;
 
@@ -484,10 +487,12 @@ public class GA {
                                         double[] off_fitness,  double[] off_weights) {
         List<Object> pop_info;
         if (params.get("how_selSurv") == "X") {
-            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
+            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, 
+                                                    offsprings, off_fitness, off_weights, this);
         }
         else {
-            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
+            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, 
+                                                    offsprings, off_fitness, off_weights, this);
         }
         return pop_info;
     }
@@ -534,6 +539,7 @@ public class GA {
             // Update params
             this.theta_base += 5;
             this.theta_exp += 0.1;
+            this.GC_phi -= 0.015;
             // Store data for gen > 0
             eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights));
         }

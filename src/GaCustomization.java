@@ -438,10 +438,10 @@ public class GACustomization {
     // Genaralized Crowding
     public List<Object> selectSurvivors_BASE(int[][][] pop, double[] pop_fitness, 
                                             double[] pop_weights, int[][][] offsprings, 
-                                            double[] off_fitness,  double[] off_weights) {
+                                            double[] off_fitness,  double[] off_weights, GA ga) {
         List<Object> newPop_info = new ArrayList<>();
         // Get phi to GC
-        double phi = (double) params.get("GC_phi");
+        double phi = ga.getGCPhi();
         // Init new pop and pop_fitness
         int[][][] newPop = new int[pop.length][][];
         double[] newFitness = new double[pop.length];
