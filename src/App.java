@@ -19,7 +19,6 @@ public class App {
         params.put("p_c", 0.5);
         params.put("gen_stop", 20);
         params.put("nurse_cut", 0.1);
-        params.put("worst_traveltime", 10000);
         params.put("GC_phi", 0.3);
         params.put("theta_base", 30);
         params.put("theta_exp", 1.5);

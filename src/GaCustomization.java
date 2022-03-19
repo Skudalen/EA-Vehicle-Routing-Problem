@@ -388,6 +388,7 @@ public class GACustomization {
         // Initialize off_info list and off_fitness array
         List<Object> off_info = new ArrayList<>();
         double[] off_fitness = new double[offsprings.length];
+        double[] off_feasible = new double[offsprings.length];
         // Retrive the prob for crossover 
         double p_m = (double) params.get("p_m");
         List<Double> doMuteProb = Arrays.asList(1-p_m, p_m);
@@ -424,11 +425,13 @@ public class GACustomization {
                     offsprings[i][j][point2] = val1;
                 }
             }
-            double indiv_fitnes = ga.checkIndivValidTravel(offsprings[i], ga.getPatients(), ga.getDepot(), ga.getTravel_times());
-            off_fitness[i] = indiv_fitnes;
+            List<Object> fit_info = ga.checkIndivValidTravel(offsprings[i], ga.getPatients(), ga.getDepot(), ga.getTravel_times());
+            off_fitness[i] = (double) fit_info.get(0);
+            off_feasible[i] = (double) fit_info.get(1);
         }
         off_info.add(offsprings);
         off_info.add(off_fitness);
+        off_info.add(off_feasible);
         return off_info;
     }
 

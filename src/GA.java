@@ -13,6 +13,8 @@ public class GA {
     private int gen_stop;
     private double theta_base;
     private double theta_exp;
+    private double nurse_cut;
+    private double GC_phi;
     // -------------------------------
     private String instance_name;
     private Long nbr_nurses;
@@ -22,8 +24,6 @@ public class GA {
     private Map<String, Map<String, Long>> patients;
     private Double[][] travel_times;
     private Long num_patients;
-    private double worst_traveltime;
-
     // -------------------------------
     private GACustomization custom_GA;
     // -------------------------------
@@ -37,7 +37,8 @@ public class GA {
         this.gen_stop = (Integer) params.get("gen_stop");
         this.theta_base = (double) (int) params.get("theta_base");
         this.theta_exp = (double) params.get("theta_exp");
-        this.worst_traveltime = (double) (int) params.get("worst_traveltime");
+        this.nurse_cut = (double) params.get("nurse_cut");
+        this.GC_phi = (double) params.get("GC_phi");
         // -------------------------------
         json_reader.json_read(this, path);
         this.custom_GA = custom;
@@ -45,72 +46,45 @@ public class GA {
         this.num_patients = (long) this.patients.size();
     }
 
-
     public Double[][] getTravel_times() {
         return travel_times;
     }
-
-
     public void setTravel_times(Double[][] travel_times) {
         this.travel_times = travel_times;
     }
-
-
     public Map<String, Map<String, Long>> getPatients() {
         return patients;
     }
-
-
     public void setPatients(Map<String, Map<String, Long>> patients) {
         this.patients = patients;
     }
-
-
     public Map<String, Long> getDepot() {
         return depot;
     }
-
-
     public void setDepot(Map<String, Long> depot) {
         this.depot = depot;
     }
-
-
     public Double getBenchmark() {
         return benchmark;
     }
-
-
     public void setBenchmark(Double benchmark) {
         this.benchmark = benchmark;
     }
-
-
     public Long getCapacity_nurse() {
         return capacity_nurse;
     }
-
-
     public void setCapacity_nurse(Long long1) {
         this.capacity_nurse = long1;
     }
-
-
     public Long getNbr_nurses() {
         return this.nbr_nurses;
     }
-
-
     public void setNbr_nurses(Long long1) {
         this.nbr_nurses = long1;
     }
-
-
     public String getInstance_name() {
         return instance_name;
     }
-
-
     public void setInstance_name(String instance_name) {
         this.instance_name = instance_name;
     }
@@ -134,7 +108,6 @@ public class GA {
         System.out.println("Travel_times 1,3:\n" + travel_times[1][3]);
         System.out.println(travel_times.length);
     }
-
     public void testMakeIndiv_BASE() {
         int[][] indiv = this.custom_GA.makeIndiv_BASE((long) 5, 20, (long) 200, this.patients, this.depot);
         System.out.println(Arrays.deepToString(indiv));
@@ -145,14 +118,12 @@ public class GA {
         System.out.println(Arrays.deepToString(indiv));
         //System.out.println(indiv[0][0]);
     }
-
     public void testInitPop_BASE(){
         int[][][] pop = (int[][][]) initPop(pop_size=5, nbr_nurses=(long)25, num_patients=(long)100, capacity_nurse=(long)200, this.patients, this.depot).get(0);
         for (int[][] array : pop) {
             System.out.println(Arrays.deepToString(array));
         }
     }
-
     public void testInitPop_RANDCUT(){
         int[][][] pop = new int[pop_size][][];
         double[] pop_fitness = new double[pop_size];
@@ -160,7 +131,7 @@ public class GA {
         for (int i=0; i<pop_size; i++) {
             int[][] indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot);
             pop[i] = indiv;
-            pop_fitness[i] = checkIndivValidTravel(indiv, patients, depot, travel_times);
+            pop_fitness[i] = (double) checkIndivValidTravel(indiv, patients, depot, travel_times).get(0);
         }
         for (int i=0; i<pop_size; i++) {
             System.out.println(Arrays.deepToString(pop[i]));
@@ -168,7 +139,6 @@ public class GA {
             System.out.println(pop_fitness[i]);
         }
     }
-
     public void testInitPop_RANDCUT_easy(){
         int[][][] pop = {
             {
@@ -190,7 +160,7 @@ public class GA {
 
         for (int i=0; i<pop.length; i++) {
             int[][] indiv = pop[i];
-            pop_fitness[i] = checkIndivValidTravel(indiv, patients, depot, travel_times);
+            pop_fitness[i] = (double) checkIndivValidTravel(indiv, patients, depot, travel_times).get(0);
         }
         for (int i=0; i<pop.length; i++) {
             System.out.println(Arrays.deepToString(pop[i]));
@@ -198,25 +168,23 @@ public class GA {
             System.out.println(pop_fitness[i]);
         }
     }
-
     public void testIsValid(){
         int pop_size = 100;
         //int[][][] pop = init_pop(pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         int[][][] pop = (int[][][]) initPop(pop_size, 5, 10, 200, this.patients, this.depot).get(0);
         List<Double> test = IntStream.range(0,pop_size)
-                                        .mapToDouble(i -> checkIndivValidTravel(pop[i], this.patients, this.depot, this.travel_times))
+                                        .mapToDouble(i -> (double) checkIndivValidTravel(pop[i], this.patients, this.depot, this.travel_times).get(0))
                                         .boxed()
                                         .collect(Collectors.toCollection(ArrayList::new));
         System.out.println(test);
         int[][][] valid_indivs = new int[pop_size][][];
         for (int i=0; i < pop.length; i++) {
-            if (test.get(i) < this.worst_traveltime) {
+            if (test.get(i) < 10000000) {
                 valid_indivs[i] = pop[i];
             }
         }
         System.out.println(Arrays.deepToString(valid_indivs));
     }
-
     public void testGetByWeights() {
         List<Double> weights = Arrays.asList(1.0, 2.0, 5.0, 7.0);
         System.out.println(weights);
@@ -234,7 +202,6 @@ public class GA {
         //int test = GACustomization.getByWeight(weights);
         //System.out.println(test);
     }
-
     public void testCross(){
         int[][][] pop = {
             {
@@ -287,7 +254,6 @@ public class GA {
             System.out.println(Arrays.deepToString(array));
         }
     }
-
     public void testSelSurv(){
         int[][][] pop = {
             {
@@ -326,7 +292,7 @@ public class GA {
         double[] pop_fitness = new double[offsprings.length];
         for (int i=0; i<pop.length; i++) {
             System.out.println(Arrays.deepToString(pop[i]));
-            pop_fitness[i] = checkIndivValidTravel(pop[i], this.patients, this.depot, this.travel_times);
+            pop_fitness[i] = (double) checkIndivValidTravel(pop[i], patients, depot, travel_times).get(0);
         }
         double[] pop_weights = getPopWeights(Arrays.asList(pop, pop_fitness));
         System.out.println(Arrays.toString(pop_fitness));
@@ -338,7 +304,7 @@ public class GA {
         double[] off_fitness = new double[offsprings.length];
         for (int i=0; i<offsprings.length; i++){
             System.out.println(Arrays.deepToString(offsprings[i]));
-            off_fitness[i] = checkIndivValidTravel(offsprings[i], this.patients, this.depot, this.travel_times);
+            off_fitness[i] = (double) checkIndivValidTravel(offsprings[i], patients, depot, travel_times).get(0);
         }
         double[] off_weights = getPopWeights(Arrays.asList(offsprings, off_fitness));
         System.out.println(Arrays.toString(off_fitness)); 
@@ -361,7 +327,7 @@ public class GA {
 
 
     // IMPORTANT: Fitness / Travel_time
-    public double checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
+    public List<Object> checkIndivValidTravel(int[][] indiv, Map<String, Map<String, Long>> patients, Map<String, Long> depot, Double[][] travel_times) {
         double rt = (double) depot.get("return_time");
         double theta_base = (double) (int)params.get("theta_base");
         double theta_exp = (double) params.get("theta_exp");
@@ -405,14 +371,14 @@ public class GA {
         // Add penalty to travel_time (tt_total + theta * penalties)
         tt_total += (theta_base * Math.pow(penalties, theta_exp));
 
-        return tt_total;
+        return Arrays.asList(tt_total, penalties);
     }
 
-    
     public List<Object> initPop(int pop_size, long nbr_nurses, long num_patients, long capacity_nurse, 
                                 Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
         int[][][] pop = new int[pop_size][(int)nbr_nurses][(int)num_patients];
         double[] popFitness = new double[pop_size];
+        double[] popFeasible = new double[pop_size];
 
         for (int i=0; i<pop_size; i++) {
             int[][] indiv;
@@ -422,12 +388,13 @@ public class GA {
             else {
                 indiv = custom_GA.makeIndiv_BASE(nbr_nurses, num_patients, capacity_nurse, patients, depot);
             }
-            popFitness[i] = checkIndivValidTravel(indiv, patients, depot, this.travel_times);
+            List<Object> fitness_info = checkIndivValidTravel(indiv, patients, depot, this.travel_times);
+            popFitness[i] = (double) fitness_info.get(0);
+            popFeasible[i] = (double) fitness_info.get(1);
             pop[i] = indiv;
         }
-        return Arrays.asList(pop, popFitness);
+        return Arrays.asList(pop, popFitness, popFeasible);
     }
-
 
     public double[] getPopWeights(List<Object> pop_info){
         //int[][][] pop = (int[][][]) pop_info.get(0);
@@ -462,14 +429,12 @@ public class GA {
         return weights;
     }
 
-    
     public List<Double[]> evaluatePop(List<Object> pop) {
         
         Double[] a = new Double[this.pop_size];
         return Arrays.asList(a, a);
     }
 
-    
     public Boolean doTerminate(double[] pop_fitness, int gen_count) {
         
         return gen_count > this.gen_stop;
@@ -486,7 +451,6 @@ public class GA {
         return parents;
     }
 
-    
     public int[][][] doCrossover(int[][][] parents) {
         int[][][] offsprings;
         if (params.get("how_doCross") == "X") {
@@ -529,24 +493,6 @@ public class GA {
     }
 
 
-    /*
-    def get_pop_entropy(self, pop):
-        char_count = {k:0 for k in range(self.indiv_len)}
-        for indiv in pop:
-            for i, char in enumerate(list(indiv)):
-                if char == '1':
-                    char_count[i] += 1
-        #[print(key, value) for key, value in char_count.items()]
-        probs = [char_count.get(i)/self.pop_size for i in char_count.keys()]
-        #entropy = - sum([p * np.log2(p) for p in probs])
-        entropy = entr(probs).sum()
-        return entropy
-    */
-    public static double getPopEntropy(int[][] pop) {
-        return 0.0;
-    }
-
-
     public List<List<Object>> main() {
         // Set the generation counter to zero
         int gen_count = 0;
@@ -585,6 +531,9 @@ public class GA {
             pop_weights = getPopWeights(pop_info);
             // Increment generation counter
             gen_count += 1;
+            // Update params
+            this.theta_base += 5;
+            this.theta_exp += 0.1;
             // Store data for gen > 0
             eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights));
         }
