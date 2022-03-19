@@ -164,6 +164,10 @@ public class GACustomization {
         return Arrays.asList(offspring1, offspring2);
     }
 
+    public static double logistic(double x) {
+        return 1 / (1 + Math.exp(x));
+    }
+
 
     // ----------------------------- CustomGA Methods -------------------------------
 
