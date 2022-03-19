@@ -116,7 +116,7 @@ public class GA {
         //System.out.println(indiv[0][0]);
     }
     public void testMakeIndiv_RandCut() {
-        int[][] indiv = this.custom_GA.makeIndiv_RANDCUT((long) 5, 20, (long) 200, this.patients, this.depot);
+        int[][] indiv = this.custom_GA.makeIndiv_RANDCUT((long) 5, 20, (long) 200, this.patients, this.depot, travel_times);
         System.out.println(Arrays.deepToString(indiv));
         //System.out.println(indiv[0][0]);
     }
@@ -129,16 +129,20 @@ public class GA {
     public void testInitPop_RANDCUT(){
         int[][][] pop = new int[pop_size][][];
         double[] pop_fitness = new double[pop_size];
+        double[] pop_feasible = new double[pop_size];
 
         for (int i=0; i<pop_size; i++) {
-            int[][] indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+            int[][] indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot, travel_times);
             pop[i] = indiv;
-            pop_fitness[i] = (double) checkIndivValidTravel(indiv, patients, depot, travel_times).get(0);
+            List<Object> fit_info = checkIndivValidTravel(indiv, patients, depot, travel_times);
+            pop_fitness[i] = (double) fit_info.get(0);
+            pop_feasible[i] = (double) fit_info.get(1);
         }
         for (int i=0; i<pop_size; i++) {
             System.out.println(Arrays.deepToString(pop[i]));
             System.out.println("SCORE: ");
             System.out.println(pop_fitness[i]);
+            System.out.println(pop_feasible[i]);
         }
     }
     public void testInitPop_RANDCUT_easy(){
@@ -355,7 +359,6 @@ public class GA {
                 // Not valid if the nurse arrives after end_time
                 if (time > end_time) {
                     penalties += 1;
-                    break;
                 }
                 // Add care_time
                 double care_time = (double) patients.get(patient_str).get("care_time");
@@ -386,7 +389,7 @@ public class GA {
         for (int i=0; i<pop_size; i++) {
             int[][] indiv;
             if ((String)params.get("how_indiv") == "RANDCUT") {
-                indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+                indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot, travel_times);
             }
             else {
                 indiv = custom_GA.makeIndiv_BASE(nbr_nurses, num_patients, capacity_nurse, patients, depot);
@@ -508,11 +511,12 @@ public class GA {
         // Create var for the pop and pop_fitness
         int[][][] pop = (int[][][]) pop_info.get(0);
         double[] pop_fitness = (double[]) pop_info.get(1);
+        double[] pop_feasible = (double[]) pop_info.get(2);
         // Get population weights and return {pop_weights}
         double[] pop_weights = getPopWeights(pop_info);
         // Add the first log at gen=0 -> gen_count:{pop, pop_weights, pop_fitness}
         List<List<Object>> eval_log = new ArrayList<List<Object>>();
-        eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights));
+        eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights, pop_feasible));
 
         // -------EVOLUTION-------:
         // Terminate on condition
@@ -533,6 +537,7 @@ public class GA {
             // Updating var for the pop, pop_fitness, and pop_weights
             pop = (int[][][]) pop_info.get(0);
             pop_fitness = (double[]) pop_info.get(1);
+            pop_feasible = (double[]) pop_info.get(2);
             pop_weights = getPopWeights(pop_info);
             // Increment generation counter
             gen_count += 1;
@@ -541,7 +546,7 @@ public class GA {
             this.theta_exp += 0.1;
             this.GC_phi -= 0.015;
             // Store data for gen > 0
-            eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights));
+            eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights, pop_feasible));
         }
         System.out.println("Algorithm succsessfully executed");
         return eval_log;

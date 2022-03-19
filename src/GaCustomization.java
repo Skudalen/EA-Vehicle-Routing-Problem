@@ -168,48 +168,70 @@ public class GACustomization {
         return 1 / (1 + Math.exp(-x));
     }
 
+    public static double getTimeAdd(int patient, int last_patient, 
+                                    Map<String, Map<String, Long>> patients, Double[][] travel_times) {
+        double time = 0; 
+        String patient_str = String.valueOf(patient);
+        // add travel time
+        double travel = (double) travel_times[last_patient][patient];
+        time += travel;
+        // def start time and wait until that
+        double start_time = (double) patients.get(patient_str).get("start_time");
+        double wait_time = (start_time - time);
+        if (start_time > time) time += wait_time;
+        // Add care_time
+        double care_time = (double) patients.get(patient_str).get("care_time");
+        time += care_time;
+        // Add return to depot
+        double get_back = (double) travel_times[patient][0];
+        time += get_back;
+
+        return time;
+    }
+
 
     // ----------------------------- CustomGA Methods -------------------------------
 
-    public int[][] makeIndiv_BASE(long num_nurses, long num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
+    public int[][] makeIndiv_BASE(long num_nurses, long num_patients, long nurse_cap, 
+                                    Map<String, Map<String, Long>> patients, Map<String, Long> depot,
+                                    Double[][] travel_times) {
         // Make return object shell 
         int[][] indiv = new int[(int) num_nurses][];
         // Make list of all patients to be assigned
         List<Integer> patient_ints = new ArrayList<Integer>(IntStream.rangeClosed(1, (int)num_patients)
                                                     .boxed()
                                                     .collect(Collectors.toList()));
+        // Set up randCut for skipping to next nurse prob
+        double nurse_cut = (double) params.get("nurse_cut");
+        List<Double> cut_weights = Arrays.asList(1-nurse_cut, nurse_cut);
         // For each nurse available 
         for (int i=0; i<num_nurses; i++) {
             // Initialize with nurse capacity and return time
-            Long cap = nurse_cap;
-            Long rt = depot.get("return_time");
+            double cap = nurse_cap;
+            double rt = depot.get("return_time");
             // Initialize with nurse capacity and return time
             List<Integer> nurse_list = new ArrayList<Integer>();
             // For patient that nurse can treat 
             for (int j=1; j<num_patients; j++) {
-                if (cap > 0 && patient_ints.size() > 0 && rt > 0) {
-                    // Select patient randomly
-                    int rand_index = ThreadLocalRandom.current().nextInt(0, patient_ints.size());
-                    int patient = patient_ints.remove(rand_index);
-                    // Substract demand from capacity
-                    String patient_str = String.valueOf(patient);
-                    Long cap_used = patients.get(patient_str).get("demand");
-                    cap -= cap_used;
-                    // Substract time consumption from return time
-                    Long time_used = patients.get(patient_str).get("care_time");
-                    rt -= time_used;
+                if (patient_ints.size() == 0) break;
+                // Select patient randomly
+                int rand_index = ThreadLocalRandom.current().nextInt(0, patient_ints.size());
+                int patient = patient_ints.remove(rand_index);
+                String patient_str = String.valueOf(patient);
+                // Get demand (for cap)
+                double cap_use = patients.get(patient_str).get("demand");
+                if (cap > cap_use) {
                     // Add patient to nurse
-                    if (cap > 0.0 && rt > 0.0){
-                        nurse_list.add(patient);
+                    nurse_list.add(patient);
+                    // Substract demand
+                    cap -= cap_use;
+                    // Break stocasticly
+                    if (nurse_list.size() >= num_patients/num_nurses) {
+                        if (getByWeight(cut_weights) == 1) break;
                     }
-                    else {
-                        patient_ints.add(patient);
-                        break;
-                    }
-                    //System.out.println("Nurse " + i + ", capacity: " + cap);
-                    //System.out.println("Nurse " + i + ", return time left: " + rt);
                 }
                 else {
+                    patient_ints.add(patient);
                     break;
                 }
             }
@@ -227,12 +249,13 @@ public class GACustomization {
             else {
                 indiv[i] = new int[0];
             }
-            //System.out.println(Arrays.deepToString(indiv));
         }
         return indiv;
     }
-    
-    public int[][] makeIndiv_RANDCUT(long num_nurses, long num_patients, long nurse_cap, Map<String, Map<String, Long>> patients, Map<String, Long> depot) {
+
+    public int[][] makeIndiv_RANDCUT(long num_nurses, long num_patients, long nurse_cap, 
+                                    Map<String, Map<String, Long>> patients, Map<String, Long> depot,
+                                    Double[][] travel_times) {
         // Make return object shell 
         int[][] indiv = new int[(int) num_nurses][];
         // Make list of all patients to be assigned
@@ -245,38 +268,42 @@ public class GACustomization {
         // For each nurse available 
         for (int i=0; i<num_nurses; i++) {
             // Initialize with nurse capacity and return time
-            Long cap = nurse_cap;
-            Long rt = depot.get("return_time");
+            double cap = nurse_cap;
+            double rt = depot.get("return_time");
             // Initialize with nurse capacity and return time
             List<Integer> nurse_list = new ArrayList<Integer>();
             // For patient that nurse can treat 
             for (int j=1; j<num_patients; j++) {
-                if (cap > 0 && patient_ints.size() > 0 && rt > 0) {
-                    // Select patient randomly
-                    int rand_index = ThreadLocalRandom.current().nextInt(0, patient_ints.size());
-                    int patient = patient_ints.remove(rand_index);
-                    // Substract demand from capacity
-                    String patient_str = String.valueOf(patient);
-                    Long cap_used = patients.get(patient_str).get("demand");
-                    cap -= cap_used;
-                    // Substract time consumption from return time
-                    Long time_used = patients.get(patient_str).get("care_time");
-                    rt -= time_used;
+                if (patient_ints.size() == 0) break;
+                // Select patient randomly
+                int rand_index = ThreadLocalRandom.current().nextInt(0, patient_ints.size());
+                int patient = patient_ints.remove(rand_index);
+                String patient_str = String.valueOf(patient);
+                // Get demand (for cap)
+                double cap_use = patients.get(patient_str).get("demand");
+                // Get time consumption (for rt))
+                int last_patient = 0;
+                if (nurse_list.size() > 0) last_patient = nurse_list.get(nurse_list.size()-1);
+                //else if (nurse_list.size() == 0) rt -= travel_times[last_patient][patient];
+                double time_use = getTimeAdd(patient, last_patient, patients, travel_times);
+                if (cap > cap_use && rt > time_use) {
                     // Add patient to nurse
-                    if (cap > 0.0 && rt > 0.0){
-                        nurse_list.add(patient);
+                    nurse_list.add(patient);
+                    // Substract demand and time consumption
+                    cap -= cap_use;
+                    //rt -= time_use;
+                    // Break stocasticly
+                    if (nurse_list.size() >= num_patients/num_nurses) {
                         if (getByWeight(cut_weights) == 1) break;
                     }
-                    else {
-                        patient_ints.add(patient);
-                        break;
-                    }
-                    //System.out.println("Nurse " + i + ", capacity: " + cap);
-                    //System.out.println("Nurse " + i + ", return time left: " + rt);
                 }
                 else {
+                    patient_ints.add(patient);
                     break;
                 }
+                //System.out.println("Nurse " + i + ", capacity: " + cap);
+                //System.out.println("Nurse " + i + ", return time left: " + rt);
+                
             }
             // Add remaining patients if more left
             if (i == (num_nurses-1) && patient_ints.size() > 0){
