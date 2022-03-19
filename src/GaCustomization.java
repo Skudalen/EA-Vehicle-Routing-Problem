@@ -165,7 +165,7 @@ public class GACustomization {
     }
 
     public static double logistic(double x) {
-        return 1 / (1 + Math.exp(x));
+        return 1 / (1 + Math.exp(-x));
     }
 
 
@@ -452,11 +452,10 @@ public class GACustomization {
             double p2_w = pop_weights[i+1];
             double o1_w = off_weights[i];
             double o2_w = off_weights[i+1];
-            Logit logit = new Logit();
             if (getIndivDiff(p1, o1) + getIndivDiff(p2, o2) < getIndivDiff(p1, o2) + getIndivDiff(p2, o1)) {
                 // p1 vs. o1
-                double logit_po = Math.pow(phi, logit.value(p1_w-o1_w));
-                double logit_op = Math.pow(phi, logit.value(o1_w-p1_w));
+                double logit_po = Math.pow(phi, logistic(p1_w-o1_w));
+                double logit_op = Math.pow(phi, logistic(o1_w-p1_w));
                 double p_o = (logit_po * o1_w) / (logit_po * o1_w + logit_op * p1_w);
                 List<Double> chooseOffProb = Arrays.asList(1-p_o, p_o);
                 int temp = getByWeight(chooseOffProb);
@@ -469,8 +468,8 @@ public class GACustomization {
                     newFitness[i] = off_fitness[i];
                 }
                 // p2 vs. o2
-                logit_po = Math.pow(phi, logit.value(p2_w-o2_w));
-                logit_op = Math.pow(phi, logit.value(o2_w-p2_w));
+                logit_po = Math.pow(phi, logistic(p2_w-o2_w));
+                logit_op = Math.pow(phi, logistic(o2_w-p2_w));
                 p_o = (logit_po * o2_w) / (logit_po * o2_w + logit_op * p2_w);
                 chooseOffProb = Arrays.asList(1-p_o, p_o);
                 temp = getByWeight(chooseOffProb);
@@ -485,8 +484,8 @@ public class GACustomization {
             }
             else {
                 // p1 vs. o2
-                double logit_po = Math.pow(phi, logit.value(p1_w-o2_w));
-                double logit_op = Math.pow(phi, logit.value(o2_w-p1_w));
+                double logit_po = Math.pow(phi, logistic(p1_w-o2_w));
+                double logit_op = Math.pow(phi, logistic(o2_w-p1_w));
                 double p_o = (logit_po * o2_w) / (logit_po * o2_w + logit_op * p1_w);
                 List<Double> chooseOffProb = Arrays.asList(1-p_o, p_o);
                 int temp = getByWeight(chooseOffProb);
@@ -499,8 +498,8 @@ public class GACustomization {
                     newFitness[i] = off_fitness[i+1];
                 }
                 // p2 vs. o1
-                logit_po = Math.pow(phi, logit.value(p2_w-o1_w));
-                logit_op = Math.pow(phi, logit.value(o1_w-p2_w));
+                logit_po = Math.pow(phi, logistic(p2_w-o1_w));
+                logit_op = Math.pow(phi, logistic(o1_w-p2_w));
                 p_o = (logit_po * o1_w) / (logit_po * o1_w + logit_op * p2_w);
                 chooseOffProb = Arrays.asList(1-p_o, p_o);
                 temp = getByWeight(chooseOffProb);

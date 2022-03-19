@@ -352,7 +352,8 @@ public class GA {
         for (int i=0; i<pop.length; i++) {
             System.out.println(Arrays.deepToString(newPop[i]));
         }
-        System.out.println(pop_info.get(1));
+        double[] newFitness = (double[]) pop_info.get(1);
+        System.out.println(Arrays.toString(newFitness));
     }
 
 
@@ -434,7 +435,6 @@ public class GA {
 
         // Scale from low-best to high-best
         double max_traveltime = Collections.max(pop_fitness) * 1.1;
-
         double[] weights = pop_fitness.stream()
                                     //.map(x -> Math.pow((max_traveltime - x), 1.2) )
                                     .map(x -> (max_traveltime - x))
@@ -560,7 +560,8 @@ public class GA {
         // Get population weights and return {pop_weights}
         double[] pop_weights = getPopWeights(pop_info);
         // Add the first log at gen=0 -> gen_count:{pop, pop_weights, pop_fitness}
-        List<List<Object>> eval_log = Arrays.asList(Arrays.asList(pop, pop_fitness, pop_weights));
+        List<List<Object>> eval_log = new ArrayList<List<Object>>();
+        eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights));
 
         // -------EVOLUTION-------:
         // Terminate on condition

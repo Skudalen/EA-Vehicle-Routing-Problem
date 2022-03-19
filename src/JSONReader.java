@@ -1,5 +1,9 @@
 
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONArray;
@@ -51,6 +55,33 @@ public class JSONReader {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+    }
+
+    public void jsonWriteResults(List<List<Object>> eval_log) {
+        //List of all generational info
+        JSONArray genList = new JSONArray();
+
+        // Add details from each generation to genList
+        for (int i=0; i<eval_log.size(); i++) {
+            int[][][] pop = (int[][][]) eval_log.get(i).get(0);
+            double[] fitness = (double[]) eval_log.get(i).get(1);
+            double[] weights = (double[]) eval_log.get(i).get(2);
+
+            JSONObject genDetails = new JSONObject();
+            genDetails.put("pop", Arrays.deepToString(pop));
+            genDetails.put("fitness", Arrays.toString(fitness));
+            genDetails.put("weights", Arrays.toString(weights));
+
+            genList.add(genDetails);
+        }
+        // Write to file
+        try (FileWriter file = new FileWriter("log.json")) {
+            file.write(genList.toJSONString()); 
+            file.flush();
+ 
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
