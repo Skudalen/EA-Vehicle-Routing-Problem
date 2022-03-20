@@ -8,7 +8,6 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.math3.analysis.function.Logit;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
 
@@ -31,7 +30,6 @@ public class GACustomization {
         int selected_int = new EnumeratedDistribution<>(itemWeights).sample();
         return selected_int;
     }
-
     static public double getIndivDiff(int[][] indiv1, int[][] indiv2) {
         double diff = 0;
         int[] shortest;
@@ -63,15 +61,17 @@ public class GACustomization {
         }
         return false;
     }
-
-    static public List<int[]> PMX(Map<String, Object> params, int[] nurse1, int[] nurse2) {
+    static public List<int[]> PMX(int[] nurse1, int[] nurse2, GA ga) {
         // Retrive the prob for crossover 
-        double p_c = (double) params.get("p_c");
+        double p_c = ga.getP_c();
         List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
         // Determine the longest and shortest
         int[] shortest = nurse1; 
         if (nurse2.length < nurse1.length) shortest = nurse2;
         // Get two crossover points
+        int point1 = ThreadLocalRandom.current().nextInt(0, shortest.length);
+        int point2 = ThreadLocalRandom.current().nextInt(0, shortest.length);
+        /*
         int point1 = -1;
         int point2 = -1;
         int point_counter = 0;
@@ -89,9 +89,15 @@ public class GACustomization {
                 else break;
             }
         }
+        */
         // Finish if one crossoverpoint was not found
-        if (point1 == -1 || point2 == -1) return Arrays.asList(nurse1, nurse2);
-
+        if (point1 == point2) return Arrays.asList(nurse1, nurse2);
+        // Make point2 largest
+        int val = point2;
+        if (point1 > point2) {
+            point2 = point1;
+            point1 = val;
+        }
         // -------- DO CROSSOVER ---------
         // Init offsprings
         int[] offspring1 = new int[nurse1.length];
@@ -160,14 +166,11 @@ public class GACustomization {
                 }
             }
         }
-        
         return Arrays.asList(offspring1, offspring2);
     }
-
     public static double logistic(double x) {
         return 1 / (1 + Math.exp(-x));
     }
-
     public static double getTimeAdd(int patient, int last_patient, 
                                     Map<String, Map<String, Long>> patients, Double[][] travel_times) {
         double time = 0; 
@@ -206,9 +209,8 @@ public class GACustomization {
         List<Double> cut_weights = Arrays.asList(1-nurse_cut, nurse_cut);
         // For each nurse available 
         for (int i=0; i<num_nurses; i++) {
-            // Initialize with nurse capacity and return time
+            // Initialize with nurse capacity
             double cap = nurse_cap;
-            double rt = depot.get("return_time");
             // Initialize with nurse capacity and return time
             List<Integer> nurse_list = new ArrayList<Integer>();
             // For patient that nurse can treat 
@@ -332,7 +334,6 @@ public class GACustomization {
         }
         return pop;
     }
-
     // One-point Crossover
     public int[][][] doCrossover_OLD(int[][][] pop) {
         // Retrive the prob for crossover 
@@ -385,7 +386,7 @@ public class GACustomization {
         return pop;
     }
     // PMX Crossover
-    public int[][][] doCrossover_BASE(int[][][] pop) {
+    public int[][][] doCrossover_BASE(int[][][] pop, GA ga) {
         // Iterate each individual
         for (int i=0; i<pop.length-1; i+=2) {
             // Choose two parents 
@@ -398,7 +399,7 @@ public class GACustomization {
             int[] parent1_flat = Arrays.stream(parent1).flatMapToInt(Arrays::stream).toArray();
             int[] parent2_flat = Arrays.stream(parent2).flatMapToInt(Arrays::stream).toArray();
             // PMX
-            List<int[]> offsprings = PMX(params, parent1_flat, parent2_flat);
+            List<int[]> offsprings = PMX(parent1_flat, parent2_flat, ga);
             int[] off1_flat = offsprings.get(0);
             int[] off2_flat = offsprings.get(1);
             // Offsprings to return
@@ -441,7 +442,7 @@ public class GACustomization {
         double[] off_fitness = new double[offsprings.length];
         double[] off_feasible = new double[offsprings.length];
         // Retrive the prob for crossover 
-        double p_m = (double) params.get("p_m");
+        double p_m = ga.getP_m();
         List<Double> doMuteProb = Arrays.asList(1-p_m, p_m);
         // Iterate each indiv, set of nurses
         for (int i=0; i<offsprings.length; i++) {
@@ -492,39 +493,40 @@ public class GACustomization {
         double[] off_fitness = new double[offsprings.length];
         double[] off_feasible = new double[offsprings.length];
         // Retrive the prob for crossover 
-        double p_m = (double) params.get("p_m");
+        double p_m = ga.getP_m();
         List<Double> doMuteProb = Arrays.asList(1-p_m, p_m);
         // Iterate each indiv, set of nurses
         for (int i=0; i<offsprings.length; i++) {
             // Determine whether to mutate
             int mutate = getByWeight(doMuteProb);
-            if (mutate == 0) continue;
-            // Get Indiv
             int[][] indiv = offsprings[i];
-            // Save nurse lengths and flatten parents to do mutation
-            List<Integer> nurse_lenghts = Arrays.stream(indiv).map(x -> x.length).collect(Collectors.toList());
-            int[] indiv_flat = Arrays.stream(indiv).flatMapToInt(Arrays::stream).toArray();
-            // Choose points
-            int point1 = ThreadLocalRandom.current().nextInt(0, indiv_flat.length);
-            int point2 = ThreadLocalRandom.current().nextInt(0, indiv_flat.length);
-            if (point1 == point2) continue;
-            
-            // Set mutation
-            int val1 = indiv_flat[point1];
-            int val2 = indiv_flat[point2];
-            indiv_flat[point1] = val2;
-            indiv_flat[point2] = val1;
-
-            // Get back to nurse set
-            int last_patient_index = 0;
-            for (int j=0; j<nurse_lenghts.size(); j++) {
-                int nurse_len = nurse_lenghts.get(j);
-                int[] nurse = new int[nurse_len];
-                for (int k=0; k<nurse_len; k++) {
-                    nurse[k] = indiv_flat[last_patient_index + k];
+            if (mutate == 1) {
+                // Get Indiv
+                // Save nurse lengths and flatten parents to do mutation
+                List<Integer> nurse_lenghts = Arrays.stream(indiv).map(x -> x.length).collect(Collectors.toList());
+                int[] indiv_flat = Arrays.stream(indiv).flatMapToInt(Arrays::stream).toArray();
+                // Choose points
+                int point1 = ThreadLocalRandom.current().nextInt(0, indiv_flat.length);
+                int point2 = ThreadLocalRandom.current().nextInt(0, indiv_flat.length);
+                if (point1 != point2) {
+                    // Set mutation
+                    int val1 = indiv_flat[point1];
+                    int val2 = indiv_flat[point2];
+                    indiv_flat[point1] = val2;
+                    indiv_flat[point2] = val1;
+        
+                    // Get back to nurse set
+                    int last_patient_index = 0;
+                    for (int j=0; j<nurse_lenghts.size(); j++) {
+                        int nurse_len = nurse_lenghts.get(j);
+                        int[] nurse = new int[nurse_len];
+                        for (int k=0; k<nurse_len; k++) {
+                            nurse[k] = indiv_flat[last_patient_index + k];
+                        }
+                        last_patient_index += nurse_len;
+                        indiv[j] = nurse;
+                    }
                 }
-                last_patient_index += nurse_len;
-                indiv[j] = nurse;
             }
             // Put indiv back
             offsprings[i] = indiv;

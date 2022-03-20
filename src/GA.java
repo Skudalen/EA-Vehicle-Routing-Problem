@@ -40,6 +40,9 @@ public class GA {
         this.theta_base = (double) (int) params.get("theta_base");
         this.theta_exp = (double) params.get("theta_exp");
         this.GC_phi = (double) params.get("GC_phi");
+        this.p_c = (double) params.get("p_c");
+        this.p_m = (double) params.get("p_m");
+        this.p_steal = (double) params.get("p_steal");
         // -------------------------------
         json_reader.json_read(this, path);
         this.custom_GA = custom;
@@ -91,6 +94,15 @@ public class GA {
     }
     public double getGCPhi() {
         return GC_phi;
+    }
+    public double getP_c() {
+        return p_c;
+    }
+    public double getP_m() {
+        return p_m;
+    }
+    public double getP_steal() {
+        return p_steal;
     }
     // ------------------------- TESTING METHODS -----------------------------
 
@@ -176,7 +188,7 @@ public class GA {
         }
     }
     public void testIsValid(){
-        int pop_size = 100;
+        int pop_size = 10;
         //int[][][] pop = init_pop(pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         int[][][] pop = (int[][][]) initPop(pop_size, 5, 10, 200, this.patients, this.depot).get(0);
         List<Double> test = IntStream.range(0,pop_size)
@@ -230,7 +242,7 @@ public class GA {
         }
         System.out.println("\n");
 
-        pop = custom_GA.doCrossover_BASE(pop);
+        pop = custom_GA.doCrossover_BASE(pop, this);
         for (int[][] array : pop) {
             System.out.println(Arrays.deepToString(array));
         }
@@ -368,9 +380,14 @@ public class GA {
                 time += care_time;
                 // Not valid if the nurse finishes after end_time
                 if (time > end_time) penalties += 1;
+                // Update last_patient
+                last_patient = patient;
                 // -----
                 // Valid and patient travel_time is added
             }
+            // Add time to get back to depot
+            double getBack_time = (double) travel_times[last_patient][0];
+            time += getBack_time;
             // Not valid if nurse is not back within the return_time
             if (time > rt) penalties += 1;
             // -----
@@ -463,18 +480,18 @@ public class GA {
     public int[][][] doCrossover(int[][][] parents) {
         int[][][] offsprings;
         if (params.get("how_doCross") == "X") {
-            offsprings = custom_GA.doCrossover_BASE(parents);
+            offsprings = custom_GA.doCrossover_BASE(parents, this);
         }
         else {
-            offsprings = custom_GA.doCrossover_BASE(parents);
+            offsprings = custom_GA.doCrossover_BASE(parents, this);
         }
         return offsprings;
     }
 
     public List<Object> mutate(int[][][] offsprings) {
         List<Object> off_info;
-        if (params.get("how_mutate") == "X") {
-            off_info = custom_GA.mutate_BASE(offsprings, this);
+        if (params.get("how_mutate") == "SWAP") {
+            off_info = custom_GA.mutate_SWAP(offsprings, this);
         }
         else {
             off_info = custom_GA.mutate_BASE(offsprings, this);
@@ -509,7 +526,7 @@ public class GA {
         int gen_count = 0;
 
          // -------INITIALIZATION-------:
-        // Initialize population and return {pop, pop_fitness}
+        // Initialize population and return {pop, pop_fitness, pop_feasible}
         List<Object> pop_info = initPop(this.pop_size, this.nbr_nurses, this.num_patients, this.capacity_nurse, this.patients, this.depot);
         // Create var for the pop and pop_fitness
         int[][][] pop = (int[][][]) pop_info.get(0);
@@ -549,7 +566,7 @@ public class GA {
             // Update params
             this.theta_base += 1;
             //this.theta_exp += 0.1;
-            this.GC_phi -= 0.01;
+            this.GC_phi -= 0.005;
             // Store data for gen > 0
             eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights, pop_feasible));
         }
