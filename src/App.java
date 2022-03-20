@@ -13,14 +13,14 @@ public class App {
 
         // ----- Setting parameters -----
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("pop_size", 5);
+        params.put("pop_size", 10);
         params.put("p_m", 0.1);
-        params.put("p_c", 0.5);
-        params.put("gen_stop", 20);
-        params.put("nurse_cut", 0.7);
+        params.put("p_c", 0.2);
+        params.put("gen_stop", 50);
+        params.put("nurse_cut", 0.5);
         params.put("GC_phi", 0.7);
-        params.put("theta_base", 10);
-        params.put("theta_exp", 1.0);
+        params.put("theta_base", 1);
+        params.put("theta_exp", 2.0);
         // --------------------------------------
         params.put("how_indiv", "BASE");     // BASE, RANDCUT
         params.put("how_selPar", "BASE");       // BASE,
@@ -46,13 +46,13 @@ public class App {
         //ga_algorithm.testIsValid();
         //ga_algorithm.testGetByWeights();
         //ga_algorithm.testGetPopWeights();
-        ga_algorithm.testCross();
+        //ga_algorithm.testCross();
         //ga_algorithm.testMutate();
         //ga_algorithm.testSelSurv();
         
 
         // ----- Main ------
-        /*
+        ///*
         List<List<Object>> eval_log = ga_algorithm.main();
         List<Object> last_gen = eval_log.get(10);
         int[][][] pop = (int[][][]) last_gen.get(0);
@@ -63,7 +63,7 @@ public class App {
         System.out.println(Arrays.toString(feasible));
 
         json_parser.jsonWriteResults(eval_log);
-        */
+        //*/
     }
 }
 

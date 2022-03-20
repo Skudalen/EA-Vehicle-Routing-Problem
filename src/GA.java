@@ -13,8 +13,10 @@ public class GA {
     private int gen_stop;
     private double theta_base;
     private double theta_exp;
-    private double nurse_cut;
     private double GC_phi;
+    private double p_c;
+    private double p_m;
+    private double p_steal;
     // -------------------------------
     private String instance_name;
     private Long nbr_nurses;
@@ -37,7 +39,6 @@ public class GA {
         this.gen_stop = (Integer) params.get("gen_stop");
         this.theta_base = (double) (int) params.get("theta_base");
         this.theta_exp = (double) params.get("theta_exp");
-        this.nurse_cut = (double) params.get("nurse_cut");
         this.GC_phi = (double) params.get("GC_phi");
         // -------------------------------
         json_reader.json_read(this, path);
@@ -296,6 +297,7 @@ public class GA {
         };
         // Set up and print pop info
         double[] pop_fitness = new double[offsprings.length];
+        double[] pop_feasible = new double[offsprings.length];
         for (int i=0; i<pop.length; i++) {
             System.out.println(Arrays.deepToString(pop[i]));
             pop_fitness[i] = (double) checkIndivValidTravel(pop[i], patients, depot, travel_times).get(0);
@@ -308,6 +310,7 @@ public class GA {
 
         // Set up and print off info
         double[] off_fitness = new double[offsprings.length];
+        double[] off_feasible = new double[offsprings.length];
         for (int i=0; i<offsprings.length; i++){
             System.out.println(Arrays.deepToString(offsprings[i]));
             off_fitness[i] = (double) checkIndivValidTravel(offsprings[i], patients, depot, travel_times).get(0);
@@ -319,7 +322,7 @@ public class GA {
         System.out.println("\n");
 
         // Calc and print new pop
-        List<Object> pop_info = selectSurvivors(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
+        List<Object> pop_info = selectSurvivors(pop, pop_fitness, pop_weights, pop_feasible, offsprings, off_fitness, off_weights, off_feasible);
         int[][][] newPop = (int[][][]) pop_info.get(0);
         for (int i=0; i<pop.length; i++) {
             System.out.println(Arrays.deepToString(newPop[i]));
@@ -486,16 +489,16 @@ public class GA {
     }
     
     public List<Object> selectSurvivors(int[][][] pop, double[] pop_fitness, 
-                                        double[] pop_weights, int[][][] offsprings, 
-                                        double[] off_fitness,  double[] off_weights) {
+                                        double[] pop_weights, double[] pop_feasible, int[][][] offsprings, 
+                                        double[] off_fitness,  double[] off_weights, double[] off_feasible) {
         List<Object> pop_info;
         if (params.get("how_selSurv") == "X") {
-            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, 
-                                                    offsprings, off_fitness, off_weights, this);
+            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, pop_feasible,
+                                                    offsprings, off_fitness, off_weights, off_feasible, this);
         }
         else {
-            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, 
-                                                    offsprings, off_fitness, off_weights, this);
+            pop_info = custom_GA.selectSurvivors_BASE(pop, pop_fitness, pop_weights, pop_feasible,
+                                                    offsprings, off_fitness, off_weights, off_feasible, this);
         }
         return pop_info;
     }
@@ -528,10 +531,12 @@ public class GA {
             // Create var for the offsprings and off_fitness
             int[][][] offsprings = (int[][][]) offsprings_info.get(0);
             double[] off_fitness = (double[]) offsprings_info.get(1);
+            double[] off_feasible = (double[]) offsprings_info.get(2);
             // Get offspring weights and return {off_weights}
             double[] off_weights = getPopWeights(offsprings_info);
             // Update population and return {pop, pop_fitness}
-            pop_info = selectSurvivors(pop, pop_fitness, pop_weights, offsprings, off_fitness, off_weights);
+            pop_info = selectSurvivors(pop, pop_fitness, pop_weights, pop_feasible, 
+                                        offsprings, off_fitness, off_weights, off_feasible);
 
             // -------UPDATING-------:
             // Updating var for the pop, pop_fitness, and pop_weights
@@ -542,9 +547,9 @@ public class GA {
             // Increment generation counter
             gen_count += 1;
             // Update params
-            this.theta_base += 5;
-            this.theta_exp += 0.1;
-            this.GC_phi -= 0.015;
+            this.theta_base += 1;
+            //this.theta_exp += 0.1;
+            this.GC_phi -= 0.01;
             // Store data for gen > 0
             eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights, pop_feasible));
         }

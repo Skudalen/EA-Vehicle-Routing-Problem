@@ -66,11 +66,13 @@ public class JSONReader {
             int[][][] pop = (int[][][]) eval_log.get(i).get(0);
             double[] fitness = (double[]) eval_log.get(i).get(1);
             double[] weights = (double[]) eval_log.get(i).get(2);
+            double[] feasible = (double[]) eval_log.get(i).get(3);
 
             JSONObject genDetails = new JSONObject();
             genDetails.put("pop", Arrays.deepToString(pop));
             genDetails.put("fitness", Arrays.toString(fitness));
             genDetails.put("weights", Arrays.toString(weights));
+            genDetails.put("penalties", Arrays.toString(feasible));
 
             genList.add(genDetails);
         }

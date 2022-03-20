@@ -386,7 +386,6 @@ public class GACustomization {
     }
     // PMX Crossover
     public int[][][] doCrossover_BASE(int[][][] pop) {
-        
         // Iterate each individual
         for (int i=0; i<pop.length-1; i+=2) {
             // Choose two parents 
@@ -432,27 +431,10 @@ public class GACustomization {
             // Add new offsprings to pop
             pop[i] = off1;
             pop[i+1] = off2;
-
-            /* // WRONG
-            // Iterate each nurse pair 
-            for (int j=0; j<parent1.length; j++) {
-                // Choose a nurse pair 
-                int[] nurse1 = parent1[j];
-                int[] nurse2 = parent2[j];
-                // Break if one nurse has no patients
-                if (nurse1.length < 1 || nurse2.length < 1) break;
-                
-                // DO CROSSOVER
-                List<int[]> offsprings = PMX(params, nurse1, nurse2);
-                pop[i][j] = offsprings.get(0);
-                pop[i+1][j] = offsprings.get(1);
-            }
-            */
         }
         return pop;
     }
-
-    // Swap Mutation
+    // Nurse internal Swap Mutation
     public List<Object> mutate_BASE(int[][][] offsprings, GA ga) {
         // Initialize off_info list and off_fitness array
         List<Object> off_info = new ArrayList<>();
@@ -503,17 +485,69 @@ public class GACustomization {
         off_info.add(off_feasible);
         return off_info;
     }
+    // Indiv Swap Mutation
+    public List<Object> mutate_SWAP(int[][][] offsprings, GA ga) {
+        // Initialize off_info list and off_fitness array
+        List<Object> off_info = new ArrayList<>();
+        double[] off_fitness = new double[offsprings.length];
+        double[] off_feasible = new double[offsprings.length];
+        // Retrive the prob for crossover 
+        double p_m = (double) params.get("p_m");
+        List<Double> doMuteProb = Arrays.asList(1-p_m, p_m);
+        // Iterate each indiv, set of nurses
+        for (int i=0; i<offsprings.length; i++) {
+            // Determine whether to mutate
+            int mutate = getByWeight(doMuteProb);
+            if (mutate == 0) continue;
+            // Get Indiv
+            int[][] indiv = offsprings[i];
+            // Save nurse lengths and flatten parents to do mutation
+            List<Integer> nurse_lenghts = Arrays.stream(indiv).map(x -> x.length).collect(Collectors.toList());
+            int[] indiv_flat = Arrays.stream(indiv).flatMapToInt(Arrays::stream).toArray();
+            // Choose points
+            int point1 = ThreadLocalRandom.current().nextInt(0, indiv_flat.length);
+            int point2 = ThreadLocalRandom.current().nextInt(0, indiv_flat.length);
+            if (point1 == point2) continue;
+            
+            // Set mutation
+            int val1 = indiv_flat[point1];
+            int val2 = indiv_flat[point2];
+            indiv_flat[point1] = val2;
+            indiv_flat[point2] = val1;
 
+            // Get back to nurse set
+            int last_patient_index = 0;
+            for (int j=0; j<nurse_lenghts.size(); j++) {
+                int nurse_len = nurse_lenghts.get(j);
+                int[] nurse = new int[nurse_len];
+                for (int k=0; k<nurse_len; k++) {
+                    nurse[k] = indiv_flat[last_patient_index + k];
+                }
+                last_patient_index += nurse_len;
+                indiv[j] = nurse;
+            }
+            // Put indiv back
+            offsprings[i] = indiv;
+            
+            List<Object> fit_info = ga.checkIndivValidTravel(offsprings[i], ga.getPatients(), ga.getDepot(), ga.getTravel_times());
+            off_fitness[i] = (double) fit_info.get(0);
+            off_feasible[i] = (double) fit_info.get(1);
+        }
+        off_info.add(offsprings);
+        off_info.add(off_fitness);
+        off_info.add(off_feasible);
+        return off_info;
+    }
     // Genaralized Crowding
-    public List<Object> selectSurvivors_BASE(int[][][] pop, double[] pop_fitness, 
-                                            double[] pop_weights, int[][][] offsprings, 
-                                            double[] off_fitness,  double[] off_weights, GA ga) {
+    public List<Object> selectSurvivors_BASE(int[][][] pop, double[] pop_fitness, double[] pop_weights, double[] pop_feasible,
+                                            int[][][] offsprings, double[] off_fitness,  double[] off_weights, double[] off_feasible, GA ga) {
         List<Object> newPop_info = new ArrayList<>();
         // Get phi to GC
         double phi = ga.getGCPhi();
         // Init new pop and pop_fitness
         int[][][] newPop = new int[pop.length][][];
         double[] newFitness = new double[pop.length];
+        double[] newFeasible = new double[pop.length];
 
         for (int i=0; i<pop.length; i+=2) {
             int[][] p1 = pop[i];
@@ -534,10 +568,12 @@ public class GACustomization {
                 if (temp == 0) {
                     newPop[i] = p1;
                     newFitness[i] = pop_fitness[i];
+                    newFeasible[i] = pop_feasible[i];
                 }
                 else {
                     newPop[i] = o1;
                     newFitness[i] = off_fitness[i];
+                    newFeasible[i] = off_feasible[i];
                 }
                 // p2 vs. o2
                 logit_po = Math.pow(phi, logistic(p2_w-o2_w));
@@ -548,10 +584,12 @@ public class GACustomization {
                 if (temp == 0) {
                     newPop[i+1] = p2;
                     newFitness[i+1] = pop_fitness[i+1];
+                    newFeasible[i+1] = pop_feasible[i+1];
                 }
                 else {
                     newPop[i+1] = o2;
                     newFitness[i+1] = off_fitness[i+1];
+                    newFeasible[i+1] = off_feasible[i+1];
                 }
             }
             else {
@@ -564,10 +602,12 @@ public class GACustomization {
                 if (temp == 0) {
                     newPop[i] = p1;
                     newFitness[i] = pop_fitness[i];
+                    newFeasible[i] = pop_feasible[i];
                 }
                 else {
                     newPop[i] = o2;
                     newFitness[i] = off_fitness[i+1];
+                    newFeasible[i] = off_feasible[i+1];
                 }
                 // p2 vs. o1
                 logit_po = Math.pow(phi, logistic(p2_w-o1_w));
@@ -578,15 +618,18 @@ public class GACustomization {
                 if (temp == 0) {
                     newPop[i+1] = p2;
                     newFitness[i+1] = pop_fitness[i+1];
+                    newFeasible[i+1] = pop_feasible[i+1];
                 }
                 else {
                     newPop[i+1] = o1;
                     newFitness[i+1] = off_fitness[i];
+                    newFeasible[i+1] = off_feasible[i];
                 }
             }
         }
         newPop_info.add(newPop);
         newPop_info.add(newFitness);
+        newPop_info.add(newFeasible);
         return newPop_info;
     }
     
