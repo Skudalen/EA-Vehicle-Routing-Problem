@@ -284,14 +284,13 @@ public class GACustomization {
                 // Get time consumption (for rt))
                 int last_patient = 0;
                 if (nurse_list.size() > 0) last_patient = nurse_list.get(nurse_list.size()-1);
-                //else if (nurse_list.size() == 0) rt -= travel_times[last_patient][patient];
                 double time_use = getTimeAdd(patient, last_patient, patients, travel_times);
                 if (cap > cap_use && rt > time_use) {
                     // Add patient to nurse
                     nurse_list.add(patient);
                     // Substract demand and time consumption
                     cap -= cap_use;
-                    //rt -= time_use;
+                    rt -= time_use;
                     // Break stocasticly
                     if (nurse_list.size() >= num_patients/num_nurses) {
                         if (getByWeight(cut_weights) == 1) break;
@@ -393,6 +392,48 @@ public class GACustomization {
             // Choose two parents 
             int[][] parent1 = pop[i];
             int[][] parent2 = pop[i+1];
+            // Save nurse lengths 
+            List<Integer> nurse_lenghts1 = Arrays.stream(parent1).map(x -> x.length).collect(Collectors.toList());
+            List<Integer> nurse_lenghts2 = Arrays.stream(parent2).map(x -> x.length).collect(Collectors.toList());
+            // Flatten parents to do PMX
+            int[] parent1_flat = Arrays.stream(parent1).flatMapToInt(Arrays::stream).toArray();
+            int[] parent2_flat = Arrays.stream(parent2).flatMapToInt(Arrays::stream).toArray();
+            // PMX
+            List<int[]> offsprings = PMX(params, parent1_flat, parent2_flat);
+            int[] off1_flat = offsprings.get(0);
+            int[] off2_flat = offsprings.get(1);
+            // Offsprings to return
+            assert nurse_lenghts1.size() == nurse_lenghts2.size() : "Offspring lenghts not eqal. They are: " + nurse_lenghts1.size() + "and" + nurse_lenghts2.size();
+            int[][] off1 = new int[nurse_lenghts1.size()][];
+            int[][] off2 = new int[nurse_lenghts2.size()][];
+            // Split up by nurse_lenghts
+            // off1:
+            int last_patient_index = 0;
+            for (int j=0; j<nurse_lenghts1.size(); j++) {
+                int nurse_len = nurse_lenghts1.get(j);
+                int[] nurse = new int[nurse_len];
+                for (int k=0; k<nurse_len; k++) {
+                    nurse[k] = off1_flat[last_patient_index + k];
+                }
+                last_patient_index += nurse_len;
+                off1[j] = nurse;
+            }
+            // off2:
+            last_patient_index = 0;
+            for (int j=0; j<nurse_lenghts2.size(); j++) {
+                int nurse_len = nurse_lenghts2.get(j);
+                int[] nurse = new int[nurse_len];
+                for (int k=0; k<nurse_len; k++) {
+                    nurse[k] = off2_flat[last_patient_index + k];
+                }
+                last_patient_index += nurse_len;
+                off2[j] = nurse;
+            }
+            // Add new offsprings to pop
+            pop[i] = off1;
+            pop[i+1] = off2;
+
+            /* // WRONG
             // Iterate each nurse pair 
             for (int j=0; j<parent1.length; j++) {
                 // Choose a nurse pair 
@@ -406,6 +447,7 @@ public class GACustomization {
                 pop[i][j] = offsprings.get(0);
                 pop[i+1][j] = offsprings.get(1);
             }
+            */
         }
         return pop;
     }

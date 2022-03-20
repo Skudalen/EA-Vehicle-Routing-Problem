@@ -22,7 +22,7 @@ public class App {
         params.put("theta_base", 10);
         params.put("theta_exp", 1.0);
         // --------------------------------------
-        params.put("how_indiv", "RANDCUT");     // BASE, RANDCUT
+        params.put("how_indiv", "BASE");     // BASE, RANDCUT
         params.put("how_selPar", "BASE");       // BASE,
         params.put("how_doCross", "BASE");      // BASE,
         params.put("how_mutate", "BASE");       // BASE,

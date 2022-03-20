@@ -111,7 +111,7 @@ public class GA {
         System.out.println(travel_times.length);
     }
     public void testMakeIndiv_BASE() {
-        int[][] indiv = this.custom_GA.makeIndiv_BASE((long) 5, 20, (long) 200, this.patients, this.depot);
+        int[][] indiv = this.custom_GA.makeIndiv_BASE((long) 5, 20, (long) 200, this.patients, this.depot, travel_times);
         System.out.println(Arrays.deepToString(indiv));
         //System.out.println(indiv[0][0]);
     }
@@ -212,7 +212,7 @@ public class GA {
         int[][][] pop = {
             {
                 {1, 2, 3, 4, 5},
-                {6, 7, 8},
+                {6, 7, 8, 9},
                 {},
                 {}
             },
@@ -392,7 +392,7 @@ public class GA {
                 indiv = custom_GA.makeIndiv_RANDCUT(nbr_nurses, num_patients, capacity_nurse, patients, depot, travel_times);
             }
             else {
-                indiv = custom_GA.makeIndiv_BASE(nbr_nurses, num_patients, capacity_nurse, patients, depot);
+                indiv = custom_GA.makeIndiv_BASE(nbr_nurses, num_patients, capacity_nurse, patients, depot, travel_times);
             }
             List<Object> fitness_info = checkIndivValidTravel(indiv, patients, depot, this.travel_times);
             popFitness[i] = (double) fitness_info.get(0);
