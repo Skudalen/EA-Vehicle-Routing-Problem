@@ -65,6 +65,7 @@ public class GACustomization {
         // Retrive the prob for crossover 
         double p_c = ga.getP_c();
         List<Double> doCrossProb = Arrays.asList(1-p_c, p_c);
+        if (getByWeight(doCrossProb) == 1) return Arrays.asList(nurse1, nurse2);
         // Determine the longest and shortest
         int[] shortest = nurse1; 
         if (nurse2.length < nurse1.length) shortest = nurse2;
@@ -191,7 +192,11 @@ public class GACustomization {
 
         return time;
     }
-
+    public static List<int[]> poolPatients(List<Integer> patient_ints, int num_pools) {
+        
+        
+        return null;
+    }
 
     // ----------------------------- CustomGA Methods -------------------------------
 
@@ -292,7 +297,8 @@ public class GACustomization {
                     nurse_list.add(patient);
                     // Substract demand and time consumption
                     cap -= cap_use;
-                    rt -= time_use;
+                    double get_back = (double) travel_times[patient][0];
+                    rt -= time_use - get_back;
                     // Break stocasticly
                     if (nurse_list.size() >= num_patients/num_nurses) {
                         if (getByWeight(cut_weights) == 1) break;

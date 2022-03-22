@@ -427,7 +427,7 @@ public class GA {
         List<Double> pop_fitness = Arrays.stream((double[]) pop_info.get(1)).boxed().collect(Collectors.toList());
 
         // Scale from low-best to high-best
-        double max_traveltime = Collections.max(pop_fitness) * 1.1;
+        double max_traveltime = Collections.max(pop_fitness) * 1.01;
         double[] weights = pop_fitness.stream()
                                     //.map(x -> Math.pow((max_traveltime - x), 1.2) )
                                     .map(x -> (max_traveltime - x))
@@ -567,6 +567,7 @@ public class GA {
             this.theta_base += 1;
             //this.theta_exp += 0.1;
             this.GC_phi -= 0.005;
+            if (GC_phi < 0.01) this.GC_phi = 0.01;
             // Store data for gen > 0
             eval_log.add(Arrays.asList(pop, pop_fitness, pop_weights, pop_feasible));
         }

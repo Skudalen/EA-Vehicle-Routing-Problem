@@ -13,14 +13,14 @@ public class App {
 
         // ----- Setting parameters -----
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("pop_size", 2);
-        params.put("gen_stop", 10);
+        params.put("pop_size", 200);
+        params.put("gen_stop", 200);
         params.put("nurse_cut", 0.5);
-        params.put("GC_phi", 0.7);
-        params.put("theta_base", 1);
-        params.put("theta_exp", 1.5);
-        params.put("p_m", 0.8);
-        params.put("p_c", 0.8);
+        params.put("GC_phi", 0.9);
+        params.put("theta_base", 10);
+        params.put("theta_exp", 1.0);
+        params.put("p_m", 0.05);
+        params.put("p_c", 1.0);
         params.put("p_steal", 0.5);
         // --------------------------------------
         params.put("how_indiv", "BASE");        // BASE, RANDCUT
